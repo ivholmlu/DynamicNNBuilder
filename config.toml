@@ -1,0 +1,15 @@
+[settings]
+learning_rate = 0.01
+batch_size = 64
+iterations = 3
+
+[[layer]]
+dim_in = 784
+dim_out = 264
+activation = "relu"
+
+
+[[layer]]
+dim_in = 264
+dim_out = 10
+activation = "linear"
