@@ -23,7 +23,7 @@ flatten = nn.Flatten()
 net = NeuralNetwork(config)
 
 num_iterations = config["settings"]["iterations"]
-
+print(config["layer"])
 for i in range(num_iterations):
     for step, (images, labels) in enumerate(train_loader):
         images = flatten(images)

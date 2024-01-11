@@ -1,5 +1,5 @@
 import torch.nn as nn
-from src.layers import Denselayer
+from src.layers import LayerFactory
 
 class NeuralNetwork(nn.Module):
 
@@ -8,10 +8,11 @@ class NeuralNetwork(nn.Module):
         #Setting up network configs
         self._layers = nn.Sequential()
         self._lr = config["settings"]["learning_rate"]
-    
+
         #Creating layers from config
+        LF = LayerFactory()
         for i, layer in enumerate(config["layer"], 1):
-            self._layers.add_module(name=f"layer_{i}", module=Denselayer(layer, self._lr))
+            self._layers.add_module(name=f"layer_{i}", module=LF(layer, self._lr))
         
     def forward(self, Z):
         for layer in self._layers:

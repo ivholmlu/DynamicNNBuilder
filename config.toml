@@ -4,12 +4,14 @@ batch_size = 64
 iterations = 3
 
 [[layer]]
+type = "dense"
 dim_in = 784
 dim_out = 264
 activation = "relu"
 
 
 [[layer]]
+type = "dense"
 dim_in = 264
 dim_out = 10
 activation = "linear"
