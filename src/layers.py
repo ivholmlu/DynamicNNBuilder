@@ -79,3 +79,9 @@ class LowRank(nn.Module):
         self.lr = lr
         activation = ActivationFactory()
         self.activation = activation(config["activation"])
+
+    def forward(self, X):
+        pass
+
+    def step(self):
+        pass
