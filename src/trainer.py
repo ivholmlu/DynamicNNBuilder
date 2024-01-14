@@ -67,4 +67,9 @@ class Trainer:
                     
             if show_progress:
                 self.test(epoch)
-            
+
+    def save(self, path):
+        torch.save(self.net.state_dict(), path)
+        print(f"Parameters saved to {path}")
+
+    
