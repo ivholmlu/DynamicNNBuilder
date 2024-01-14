@@ -9,10 +9,13 @@ class NeuralNetwork(nn.Module):
         self._layers = nn.Sequential()
         self._lr = config["settings"]["learning_rate"]
         self.flatten = nn.Flatten()
+        self._contains_lowrank = False
         #Creating layers from config
         LF = LayerFactory()
         for i, layer in enumerate(config["layer"], 1):
             self._layers.add_module(name=f"layer_{i}", module=LF(layer, self._lr))
+            if layer["type"] == "lowrank":
+                self._contains_lowrank = True
         
     def forward(self, Z):
         Z = self.flatten(Z)
@@ -20,6 +23,6 @@ class NeuralNetwork(nn.Module):
             Z = layer(Z)
         return Z
     
-    def step(self):
+    def step(self, s=False):
         for layer in self._layers:
-            layer.step()
+            layer.step(s)
