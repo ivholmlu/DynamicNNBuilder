@@ -4,20 +4,23 @@ import torch.nn as nn
 class ActivationFactory:
     def __init__(self):
         self.activations = {"relu": nn.ReLU(), "linear": nn.Identity()}
+
     def __call__(self, type):
         return self.activations[type]
     
+
 
 class LayerFactory:
     def __init__(self):
         self.classes = {"dense" : Denselayer, 
                         "vanillalowrank" : VanillaLowRank,
-                        "lowRank" : LowRank}
+                        "lowrank" : LowRank}
     def __call__(self, config, lr):
         
             print(config["type"])
             return self.classes[config["type"]](config, lr)
         
+
 
 class Denselayer(nn.Module):
     
@@ -33,13 +36,14 @@ class Denselayer(nn.Module):
     def forward(self, X):
         return self.activation(torch.matmul(X, self._W) + self._b)
     
-    @torch.no_grad
+    @torch.no_grad()
     def step(self, s):
         if not s:
             self._W.data = self._W - self.lr*self._W.grad
             self._b.data = self._b - self.lr*self._b.grad
             self._W.grad.zero_()
             self._b.grad.zero_()
+
 
 class VanillaLowRank(nn.Module):
     
@@ -49,7 +53,6 @@ class VanillaLowRank(nn.Module):
         self._U = nn.Parameter(torch.randn(config["dim_in"], config["rank"]), requires_grad=True)
         self._S = nn.Parameter(torch.randn(config["rank"], config["rank"]), requires_grad=True)
         self._VT = nn.Parameter(torch.randn(config["rank"], config["dim_out"]), requires_grad=True)
-
         self._b = nn.Parameter(torch.randn(config["dim_out"]), requires_grad=True)
 
         activation = ActivationFactory()
@@ -60,6 +63,7 @@ class VanillaLowRank(nn.Module):
         W = torch.matmul(torch.matmul(self._U, self._S), self._VT)
         return self.activation(torch.matmul(X, W) + self._b)
     
+    @torch.no_grad
     def step(self, s):
         if not s:
             self._U.data = self._U - self.lr*self._U.grad
@@ -71,6 +75,7 @@ class VanillaLowRank(nn.Module):
             self._VT.grad.zero_()
             self._b.grad.zero_()
 
+
 class LowRank(nn.Module):
     def __init__(self, config, lr) -> None:
         super(LowRank, self).__init__()
@@ -79,38 +84,63 @@ class LowRank(nn.Module):
         activation = ActivationFactory()
         self.activation = activation(config["activation"])
 
-        self._U = nn.Parameter(torch.randn(config["dim_in"], self._r), requires_grad=True)
-        self._S = nn.Parameter(torch.randn(self._r, self._r), requires_grad=True)
-        self._V = nn.Parameter(torch.randn(config["dim_out"], self._r), requires_grad=True)
+        #Initiating paramerts with gradient
+        self._U = nn.Parameter(torch.randn(config["dim_in"], self._r))
+        self._S = nn.Parameter(torch.randn(self._r, self._r))
+        self._V = nn.Parameter(torch.randn(config["dim_out"], self._r))
+        self._b = nn.Parameter(torch.randn(config["dim_out"]))
 
-        
+        self._U.data, _ = torch.linalg.qr(self._U, 'reduced')
+        self._V.data, _ = torch.linalg.qr(self._V, 'reduced')
+
+        #initiating 'copies' of U and V to be used in step
+        self._U1 = nn.Parameter(
+                                torch.randn(config["dim_in"], self._r),
+                                requires_grad=False)
+        self._V1 = nn.Parameter(
+                                torch.randn(config["dim_out"], self._r),
+                                requires_grad=False)
 
     def forward(self, X):
-        W = torch.matmul(torch.matmul(self._U, self._S), self._V.T)
-        return self.activation(torch.matmul(X, W) + self._b)
+        r = self._r
+        xU = torch.matmul(X, self._U[:,:r])
+        xUS = torch.matmul(xU, self._S[:r,:r])
+        out = torch.matmul(xUS, self._V[:,:r].T) + self._b
+        return self.activation(out)
 
+    @torch.no_grad
     def step(self, s):
-        
-        if not s:
-            # UPDATING K
-            K = torch.matmul(self._U, self._S)
-            dK = torch.matmul(self._U.grad, self._S)
-            K = K - self.lr * dK
+        lr = self.lr
 
-            U_new, _ = torch.linalg.qr(K)
-            M = torch.matmul(U_new.T, self._U)
+        if not s:
+
+            r = self._r #Rank
+            # UPDATING K(Finding new U)
+            K = torch.matmul(self._U, self._S)
+            dK = torch.matmul(self._U.grad[:, :r], self._S)
+            K = K - lr * dK
+            self._U1.data , _ = torch.linalg.qr(K, "reduced") #R is not used
 
             #Updating L
             L = torch.matmul(self._V, self._S.T)
-            dL = torch.matmul(self._V.grad[:, :self._r], self._S.T)
-            L = L - self.lr * dL
+            dL = torch.matmul(self._V.grad[:, :r], self._S.T)
+            L = L - lr * dL
+            self._V1.data , _ = torch.linalg.qr(L, "reduced") # R is not used
 
-            V_new, _ = torch.linal.qr(L)
-            N = torch.matmul(V_new.T, self._V)
-        
-            #Define S
-            self.S_tilde = torch.matmul(torch.matmul(M, self._S), N)
+            #Creating N and M
+            M = self._U1.T @ self._U
+            N = self._V.T @ self._V1
 
-        #Update S_tilde (Done after calculating loss for rest of network)
+            # Updating S, U and V
+            self._S.data = M @ self._S @ N
+            self._U.data = self._U1
+            self._V.data = self._V1
+            self._b.data = self._b - lr * self._b.grad
+            
+        # Update new S value (Done with new loss calculated)
+        else:
+            self._S.data = self._S - lr * self._S.grad
+
+
 
 
