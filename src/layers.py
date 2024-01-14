@@ -3,7 +3,10 @@ import torch.nn as nn
 
 class ActivationFactory:
     def __init__(self):
-        self.activations = {"relu": nn.ReLU(), "linear": nn.Identity()}
+        try: 
+            self.activations = {"relu": nn.ReLU(), "linear": nn.Identity()}
+        except KeyError as e:
+            print(f"Activation {e} is not a defined activation")
 
     def __call__(self, type):
         return self.activations[type]
@@ -90,8 +93,10 @@ class LowRank(nn.Module):
         self._V = nn.Parameter(torch.randn(config["dim_out"], self._r))
         self._b = nn.Parameter(torch.randn(config["dim_out"]))
 
-        self._U.data, _ = torch.linalg.qr(self._U, 'reduced')
-        self._V.data, _ = torch.linalg.qr(self._V, 'reduced')
+        U1, _ = torch.linalg.qr(self._U, 'reduced')
+        V1, _ = torch.linalg.qr(self._V, 'reduced')
+        self._U.data = U1
+        self._V.data = V1
 
         #initiating 'copies' of U and V to be used in step
         self._U1 = nn.Parameter(
@@ -108,16 +113,15 @@ class LowRank(nn.Module):
         out = torch.matmul(xUS, self._V[:,:r].T) + self._b
         return self.activation(out)
 
-    @torch.no_grad
+    @torch.no_grad()
     def step(self, s):
         lr = self.lr
 
         if not s:
-
             r = self._r #Rank
             # UPDATING K(Finding new U)
             K = torch.matmul(self._U, self._S)
-            dK = torch.matmul(self._U.grad[:, :r], self._S)
+            dK = torch.matmul(self._U.grad, self._S)
             K = K - lr * dK
             self._U1.data , _ = torch.linalg.qr(K, "reduced") #R is not used
 
@@ -136,6 +140,11 @@ class LowRank(nn.Module):
             self._U.data = self._U1
             self._V.data = self._V1
             self._b.data = self._b - lr * self._b.grad
+
+            self._U.grad.zero_()
+            self._S.grad.zero_()
+            self._V.grad.zero_()
+            self._b.grad.zero_()
             
         # Update new S value (Done with new loss calculated)
         else:

@@ -18,8 +18,9 @@ class Trainer:
         self._criterion = nn.CrossEntropyLoss() #TODO Create a criterion factory
         loader = Loader()
         self._trainloader, self._testloader = loader.load_dataset(self._config)
+        self.device = torch.device("cpu")
 
-    @torch.no_grad
+    
     def test(self, epoch):
         total = 0
         correct = 0
@@ -33,8 +34,11 @@ class Trainer:
         print(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%')
 
     def train(self, show_progress=True):
-        for i in range(self._iterations):
-            for step, (images, labels) in enumerate(self._trainloader):
+        for epoch in range(self._iterations):
+            self.net.train()
+            for batch, (images, labels) in enumerate(self._trainloader):
+                images = images.to(self.device)
+                labels = labels.to(self.device)
 
                 #Forward pass
                 out = self.net(images)
@@ -58,9 +62,9 @@ class Trainer:
                     #Update coefficients
                     self.net.step(s=True)
                 
-                if (step + 1) % 100 == 0:
-                    print(f'Epoch [{i+1}/{self._iterations}], Step [{step+1}/{len(self._trainloader)}], Loss: {loss.item():.4f}')
+                if (batch + 1) % 100 == 0:
+                    print(f'Epoch [{epoch+1}/{self._iterations}], Step [{batch+1}/{len(self._trainloader)}], Loss: {loss.item():.4f}')
                     
             if show_progress:
-                self.test(i)
+                self.test(epoch)
             
