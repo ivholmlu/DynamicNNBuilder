@@ -7,6 +7,7 @@ _parameter_dir = "parameters"
 
 def main():
     network = Trainer(_config_path)
+    network.show_arcitechture()
     network.train()
     parser = ArgumentParser(description="TODO")
 

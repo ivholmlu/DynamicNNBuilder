@@ -5,7 +5,14 @@ import torch.nn as nn
 from src.network import NeuralNetwork
 from src.layers import LayerFactory
 from src.loader import Loader
-
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'  # Resets the color
 
 class Trainer:
     """Object for training a neural network.
@@ -72,4 +79,42 @@ class Trainer:
         torch.save(self.net.state_dict(), path)
         print(f"Parameters saved to {path}")
 
-    
+    def show_arcitechture(self):
+
+        art = """
+        ______                             _      _   _ _   _______       _ _     _           
+        |  _  \                           (_)    | \ | | \ | | ___ \     (_| |   | |          
+        | | | |_   _ _ __   __ _ _ __ ___  _  ___|  \| |  \| | |_/ /_   _ _| | __| | ___ _ __ 
+        | | | | | | | '_ \ / _` | '_ ` _ \| |/ __| . ` | . ` | ___ | | | | | |/ _` |/ _ | '__|
+        | |/ /| |_| | | | | (_| | | | | | | | (__| |\  | |\  | |_/ | |_| | | | (_| |  __| |   
+        |___/  \__, |_| |_|\__,_|_| |_| |_|_|\___\_| \_\_| \_\____/ \__,_|_|_|\__,_|\___|_|   
+                __/ |                                                                         
+                |___/                                                                          """
+        print(art)
+        # Calculating maximum lengths for alignment
+        max_type_length = max(len(layer['type']) for layer in self._config["layer"])
+        max_input_length = max(len(str(layer['dim_in'])) 
+                            for layer in self._config["layer"])
+        max_output_length = max(len(str(layer['dim_out'])) 
+                                for layer in self._config["layer"])
+        max_activation_length = max(len(layer['activation']) if layer['activation'] 
+                                    else 0 for layer in self._config["layer"])
+
+        print(f"{Colors.HEADER}Network Architecture:{Colors.ENDC}")
+
+        # Iterating over layers to print details
+        for i, layer in enumerate(self._config["layer"], 1):
+            layer_type = layer['type'].ljust(max_type_length)
+            layer_input = str(layer['dim_in']).rjust(max_input_length)
+            layer_output = str(layer['dim_out']).rjust(max_output_length)
+            activation = (layer['activation'] if layer['activation'] else 'None')
+            activation = activation.ljust(max_activation_length)
+
+            layer_str = (f"{Colors.BLUE}Layer {i}: {Colors.ENDC}{layer_type}, "
+                        f"{Colors.GREEN}Input: {Colors.ENDC}{layer_input}, "
+                        f"{Colors.YELLOW}Output: {Colors.ENDC}{layer_output}, "
+                        f"{Colors.RED}Activation: {activation}{Colors.ENDC}")
+            print(layer_str)
+
+
+
