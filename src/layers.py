@@ -11,8 +11,6 @@ class ActivationFactory:
     def __call__(self, type):
         return self.activations[type]
     
-
-
 class LayerFactory:
     def __init__(self):
         self.classes = {"dense" : Denselayer, 
@@ -23,7 +21,6 @@ class LayerFactory:
             print(config["type"])
             return self.classes[config["type"]](config, lr)
         
-
 
 class Denselayer(nn.Module):
     
@@ -62,6 +59,7 @@ class VanillaLowRank(nn.Module):
         self.activation = activation(config["activation"])
         self.lr = lr
 
+        #TODO Add orthornormal basis with QR
     def forward(self, X):
         W = torch.matmul(torch.matmul(self._U, self._S), self._VT)
         return self.activation(torch.matmul(X, W) + self._b)
