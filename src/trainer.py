@@ -17,18 +17,21 @@ class Colors:
 class Trainer:
     """Object for training a neural network.
     """
-    def __init__(self, conf_path="config.toml") -> None:
+    def __init__(self, conf_path="config.toml", create_net =True) -> None:
 
         self._config = toml.load(conf_path)
-        self.net = NeuralNetwork(self._config)
-        self._iterations = self._config["settings"]["iterations"]
-        self._criterion = nn.CrossEntropyLoss() #TODO Create a criterion factory
+        if create_net:
+            
+            self.net = NeuralNetwork(self._config)
+            self._iterations = self._config["settings"]["iterations"]
+            self._criterion = nn.CrossEntropyLoss() #TODO Create a criterion factory
+        
         loader = Loader()
         self._trainloader, self._testloader = loader.load_dataset(self._config)
         self.device = torch.device("cpu")
 
     
-    def test(self, epoch):
+    def test(self, epoch=1):
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -70,13 +73,48 @@ class Trainer:
                     self.net.step(s=True)
                 
                 if (batch + 1) % 100 == 0:
-                    print(f'Epoch [{epoch+1}/{self._iterations}], Step [{batch+1}/{len(self._trainloader)}], Loss: {loss.item():.4f}')
+                    print(f"Epoch [{epoch+1}/{self._iterations}] "
+                            f"Step [{batch+1}/{len(self._trainloader)}] "
+                            f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
                     
             if show_progress:
                 self.test(epoch)
 
+    def load_params(self, path):
+        """Loading parameters from path into self.net to be used on predictions"""
+        #load_dict =  torch.load(path)
+
+        #Parsing load_dict into the network
+        network_dict = torch.load(path)
+        
+        for param in network_dict: #TODO Rewrite to function.
+            layer_dict = {}
+            print(type(network_dict[param]))
+            param = param.split('.')
+            layer_idx = str(param[1].split('_')[1])
+            print(param)
+            layer_type = param[1].split('_')[2]
+            activation = param[1].split('_')[2]
+            attribute = param[2][1:] #Since everyone has _ in front
+            #Dictionary containing list with each layer information
+            print(layer_idx)
+            if layer_idx not in layer_dict:
+                layer_dict[layer_idx] = {"type":layer_type, "activation": activation, "attributes": {}}
+                layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
+
+            else:
+                
+                layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
+        
+        layer_dict = dict(sorted(layer_dict.items()))
+        self.net = NeuralNetwork(layer_dict, create_net=False)
+
+        "Layer dict contains keys for each layer." 
+        "Key contains dictionary with key for type, activatioon and attributes which contains key for attribute and value"
+
     def save(self, path):
         torch.save(self.net.state_dict(), path)
+        print(self.net.state_dict().keys())
         print(f"Parameters saved to {path}")
 
     def show_arcitechture(self):
@@ -90,7 +128,7 @@ class Trainer:
         |___/  \__, |_| |_|\__,_|_| |_| |_|_|\___\_| \_\_| \_\____/ \__,_|_|_|\__,_|\___|_|   
                 __/ |                                                                         
                 |___/                                                                          """
-        print(art)
+        #print(art)
         # Calculating maximum lengths for alignment
         max_type_length = max(len(layer['type']) for layer in self._config["layer"])
         max_input_length = max(len(str(layer['dim_in'])) 
@@ -113,7 +151,7 @@ class Trainer:
             layer_str = (f"{Colors.BLUE}Layer {i}: {Colors.ENDC}{layer_type}, "
                         f"{Colors.GREEN}Input: {Colors.ENDC}{layer_input}, "
                         f"{Colors.YELLOW}Output: {Colors.ENDC}{layer_output}, "
-                        f"{Colors.RED}Activation: {activation}{Colors.ENDC}")
+                        f"{Colors.RED}Activation: {Colors.ENDC}{activation}")
             print(layer_str)
 
 
