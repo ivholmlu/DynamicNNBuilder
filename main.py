@@ -1,4 +1,5 @@
 from src.trainer import Trainer
+from src.nn_parser import NN_parser_factory
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -9,13 +10,7 @@ _parameter_dir = "parameters"
 
 def main():
     
-    parser = ArgumentParser(description="ANN made for solving the MNIST dataset using torch.")
-
-    parser.add_argument('-f', '--file', type=str, default=_config_path, help="File path to config file")
-    parser.add_argument('-s', '--save', type=str, help='Save the parameters with the provided filename')
-    parser.add_argument('-l', '--load', type=str, help='Load the parameters with the provided filename')
-    parser.add_argument('-k', '--kaggle', type=bool, default=False, help="Use network to create csv prediction for Kaggle comp")
-    args = parser.parse_args()
+    args = NN_parser_factory(_config_path)()
 
     par_path = Path(_parameter_dir)
 
