@@ -26,17 +26,20 @@ class Denselayer(nn.Module):
     
     def __init__(self, config, lr, load=False) -> None:
         super(Denselayer, self).__init__()
-
+        activation = ActivationFactory()
         if not load:
             self._W = nn.Parameter(torch.randn(config["dim_in"], config["dim_out"]), requires_grad=True)
             self._b = nn.Parameter(torch.randn(config["dim_out"]), requires_grad=True)
-            activation = ActivationFactory()
+            
             self.activation = activation(config["activation"])
             self.lr = lr
 
         else: 
-            self._W = config['W']
-            self._b = config['b']
+            print(config)
+            self._b = config["attributes"]['_b']
+            self._W = config["attributes"]['_W']
+            self.activation = activation(config["activation"])
+            
             
 
     def forward(self, X):
@@ -55,7 +58,7 @@ class VanillaLowRank(nn.Module):
     
     def __init__(self, config, lr, load=False) -> None:
         super(VanillaLowRank, self).__init__()
-
+        activation = ActivationFactory()
         if not load:
 
             self._U = nn.Parameter(torch.randn(config["dim_in"], config["rank"]), requires_grad=True)
@@ -68,15 +71,18 @@ class VanillaLowRank(nn.Module):
             self._U.data = U1
             self._V.data = V1
 
-            activation = ActivationFactory()
             self.activation = activation(config["activation"])
             self.lr = lr
 
         else:
-            self._U = config["U"]
-            self._S = config["S"]
-            self._V = config["V"]
-            self._b = config["b"]
+            print(config)
+            self._U = config["attributes"]['_U']
+            self._S = config["attributes"]['_S']
+            self._V = config["attributes"]["_V"]
+            self._b = config["attributes"]["_b"]
+
+            self.activation = activation(config["activation"])
+
         #TODO Add orthornormal basis with QR
     def forward(self, X):
         W = torch.matmul(torch.matmul(self._U, self._S), self._V.T)
@@ -125,10 +131,10 @@ class LowRank(nn.Module):
                                     requires_grad=False)
         
         else:
-            self._U = config["U"]
-            self._S = config["S"]
-            self._V = config["V"]
-            self._b = config["b"]
+            self._U = config["_U"]
+            self._S = config["_S"]
+            self._V = config["_V"]
+            self._b = config["_b"]
 
     def forward(self, X):
         r = self._r

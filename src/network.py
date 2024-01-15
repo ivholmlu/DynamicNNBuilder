@@ -22,7 +22,7 @@ class NeuralNetwork(nn.Module):
             self._layers = nn.Sequential()
             for layer_num in config:
                 print(config[layer_num])
-                nn.Sequential(name = f"layer_{layer_num}_{config[layer_num]['type']}_{config[layer_num]['activation']}",
+                self._layers.add_module(name = f"layer_{layer_num}_{config[layer_num]['type']}_{config[layer_num]['activation']}",
                                 module =LF(config[layer_num], load=True))
     def forward(self, Z):
         Z = self.flatten(Z)

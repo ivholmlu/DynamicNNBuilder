@@ -1,2 +1,6 @@
-data #Created when installing data from torchvision
+#Created when installing data from torchvision
+data 
 paremeters
+Game
+digit-recognizer
+config_examples

@@ -30,7 +30,6 @@ class Trainer:
         self._trainloader, self._testloader = loader.load_dataset(self._config)
         self.device = torch.device("cpu")
 
-    
     def test(self, epoch=1):
         total = 0
         correct = 0
@@ -86,18 +85,20 @@ class Trainer:
 
         #Parsing load_dict into the network
         network_dict = torch.load(path)
-        
+        layer_dict = {}
         for param in network_dict: #TODO Rewrite to function.
-            layer_dict = {}
-            print(type(network_dict[param]))
-            param = param.split('.')
-            layer_idx = str(param[1].split('_')[1])
-            print(param)
-            layer_type = param[1].split('_')[2]
-            activation = param[1].split('_')[2]
-            attribute = param[2][1:] #Since everyone has _ in front
+            
+            param_list = param.split('.')
+            layer_idx = str(param_list[1].split('_')[1])
+            layer_type = param_list[1].split('_')[2]
+            #print(param_list)
+            activation = param_list[1].split('_')[3]
+            #print(f"activation {activation}")
+            attribute = param_list[2]
+            #print(f"attribute {attribute}") #Since everyone has _ in front
+            
+            
             #Dictionary containing list with each layer information
-            print(layer_idx)
             if layer_idx not in layer_dict:
                 layer_dict[layer_idx] = {"type":layer_type, "activation": activation, "attributes": {}}
                 layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
@@ -105,6 +106,9 @@ class Trainer:
             else:
                 
                 layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
+            
+            print(layer_dict)
+
         
         layer_dict = dict(sorted(layer_dict.items()))
         self.net = NeuralNetwork(layer_dict, create_net=False)
@@ -112,6 +116,17 @@ class Trainer:
         "Layer dict contains keys for each layer." 
         "Key contains dictionary with key for type, activatioon and attributes which contains key for attribute and value"
 
+    def load_test(self, epoch=1):
+        total = 0
+        correct = 0
+        for i, (images, labels) in enumerate(self._testloader):
+            outputs = self.net(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+        
+        accuracy = correct / total
+        print(f'Validation Accuracy: {100 * accuracy:.2f}%')
     def save(self, path):
         torch.save(self.net.state_dict(), path)
         print(self.net.state_dict().keys())
