@@ -9,10 +9,10 @@ class NeuralNetwork(nn.Module):
         self._layers = nn.Sequential()
         LF = LayerFactory()
         if create_net:
-            #Setting up network configs
+            
             self._lr = config["settings"]["learning_rate"]
             self._contains_lowrank = False
-            #Creating layers from config
+            
             for i, layer in enumerate(config["layer"], 1):
                 self._layers.add_module(name=f"layer_{i}_{layer['type']}_{layer['activation']}", module=LF(layer, self._lr))
                 if layer["type"] == "lowrank":

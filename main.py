@@ -13,8 +13,6 @@ def main():
     args = NN_parser_factory(_config_path)()
 
     par_path = Path(_parameter_dir)
-
-
     ##################################### RUNNNIG NETWORK ###############################################################
     if not args.load:
         network = Trainer(args.file) #Training using config file.
@@ -22,8 +20,10 @@ def main():
         network.train()
 
     else:   #TODO
+        network = Trainer(create_net=False)
         par_path_load = par_path / args.load
-
+        network.load_params(par_path_load)
+        network.load_test()
         #network.load(par_path_load) #TODO maybe using new object?
 
     ##################################### Saving #########################################################################
@@ -32,12 +32,6 @@ def main():
         network.save(par_path_save)
     
     ##################################### Upload weights to network ######################################################
-    if args.load:
-        network = Trainer(create_net=False)
-        par_path_load = par_path / args.load
-        network.load_params(par_path_load)
-        network.load_test()
-        
 
         
 
