@@ -1,6 +1,8 @@
 #Created when installing data from torchvision
 data 
-paremeters
+parameters
 Game
 digit-recognizer
 config_examples
+.vscode
+*.pyc

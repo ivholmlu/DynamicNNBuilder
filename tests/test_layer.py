@@ -1,4 +1,4 @@
-from src.layers import Denselayer, VanillaLowRank, LowRank, ActivationFactory, LayerFactory
+from network.layers import Denselayer, VanillaLowRank, LowRank, ActivationFactory, LayerFactory
 import pytest
 import toml
 import torch.nn as nn
@@ -6,15 +6,15 @@ import torch.nn as nn
 
 config = toml.load("tests/test_conf.toml")
 
-
+nn.ReLU()
 def test_layer_factory():
     dense_obj = Denselayer(config["layer"][0], lr=0)
-    
+
 def test_creation_dense():
     dense_obj = Denselayer(config["layer"][0], lr=0)
     assert dense_obj._b.size() == (512,)
     assert dense_obj._W.size() == (784, 512)
-    print(dense_obj.activation)
+    
     assert dense_obj.activation == 5
     
 def test_creation_dense(): #TODO rewrite for vanilla and lowrank

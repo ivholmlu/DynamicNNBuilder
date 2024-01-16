@@ -18,7 +18,6 @@ class LayerFactory:
                         "lowrank" : LowRank}
     def __call__(self, config, lr=0, load=False):
         
-            print(config["type"])
             return self.classes[config["type"]](config, lr, load)
         
 
@@ -35,11 +34,10 @@ class Denselayer(nn.Module):
             self.lr = lr
 
         else: 
-            print(config)
+            
             self._b = config["attributes"]['_b']
             self._W = config["attributes"]['_W']
             self.activation = activation(config["activation"])
-            
             
 
     def forward(self, X):

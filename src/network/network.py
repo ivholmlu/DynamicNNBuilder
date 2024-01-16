@@ -1,5 +1,5 @@
 import torch.nn as nn
-from src.layers import LayerFactory
+from network.layers import LayerFactory
 
 class NeuralNetwork(nn.Module):
 
@@ -21,7 +21,6 @@ class NeuralNetwork(nn.Module):
         else: #From params
             self._layers = nn.Sequential()
             for layer_num in config:
-                print(config[layer_num])
                 self._layers.add_module(name = f"layer_{layer_num}_{config[layer_num]['type']}_{config[layer_num]['activation']}",
                                 module =LF(config[layer_num], load=True))
     def forward(self, Z):

@@ -1,12 +1,4 @@
-import toml
+lf = LayerFactory()
 
-config = toml.load("config.toml")
+layer = lf("dense")
 
-print(config)
-
-print(config["settings"]["learning_rate"])
-
-print(config["layer"])
-
-for layer in config["layer"]:
-    print(layer)

@@ -2,9 +2,11 @@ import torch
 import toml
 import torch.nn as nn
 
-from src.network import NeuralNetwork
-from src.layers import LayerFactory
-from src.loader import Loader
+from network.network import NeuralNetwork
+from network.layers import LayerFactory
+from utils.loader import Loader
+from utils.conf_handler import ConfigHandler
+
 class Colors:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
@@ -20,6 +22,8 @@ class Trainer:
     def __init__(self, conf_path="config.toml", create_net =True) -> None:
 
         self._config = toml.load(conf_path)
+        conf_handler = ConfigHandler(self._config)
+        conf_handler.check_config()
         if create_net:
             
             self.net = NeuralNetwork(self._config)
@@ -91,11 +95,10 @@ class Trainer:
             param_list = param.split('.')
             layer_idx = str(param_list[1].split('_')[1])
             layer_type = param_list[1].split('_')[2]
-            #print(param_list)
+            
             activation = param_list[1].split('_')[3]
-            #print(f"activation {activation}")
+            
             attribute = param_list[2]
-            #print(f"attribute {attribute}") #Since everyone has _ in front
             
             
             #Dictionary containing list with each layer information
@@ -107,8 +110,6 @@ class Trainer:
                 
                 layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
             
-            print(layer_dict)
-
         
         layer_dict = dict(sorted(layer_dict.items()))
         self.net = NeuralNetwork(layer_dict, create_net=False)
@@ -128,6 +129,7 @@ class Trainer:
         accuracy = correct / total
         print(f'Validation Accuracy: {100 * accuracy:.2f}%')
     def save(self, path):
+        print(self.net.state_dict())
         torch.save(self.net.state_dict(), path)
         print(self.net.state_dict().keys())
         print(f"Parameters saved to {path}")
