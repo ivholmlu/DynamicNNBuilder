@@ -1,5 +1,13 @@
 # DynamicNNBuilder
 
+The DynamicNNbuilder is meant to easily compare different metrics for several different networks. 
+By the use of factories, scaling up the project with more layer type is possible.
+
+The user can provide a directory of folder, to compare in the generated report.
+
+In this README there is a set up guide for how to set up a correct python environment.
+Furthermore there is a guide to show the usecase of the project.
+
 
 # Project Setup Guide
 

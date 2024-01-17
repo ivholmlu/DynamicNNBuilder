@@ -128,10 +128,10 @@ class Trainer:
         accuracy = correct / total
         print(f'Validation Accuracy: {100 * accuracy:.2f}%')
     def save(self, path):
-        print(self.net.state_dict())
+        #print(self.net.state_dict())
+        #print(self.net.state_dict().keys())
         torch.save(self.net.state_dict(), path)
-        print(self.net.state_dict().keys())
-        print(f"Parameters saved to {path}")
+        print(f"Parameters saved from {path.stem} to {path}")
 
     def show_arcitechture(self):
 
@@ -144,8 +144,12 @@ class Trainer:
         |___/  \__, |_| |_|\__,_|_| |_| |_|_|\___\_| \_\_| \_\____/ \__,_|_|_|\__,_|\___|_|   
                 __/ |                                                                         
                 |___/                                                                          """
-        #print(art)
+        print(art)
         # Calculating maximum lengths for alignment
+        settings = self._config["settings"]
+        print(f"{Colors.HEADER}Network Settings:{Colors.ENDC}")
+        for key, value in settings.items():
+            print(f"{Colors.BLUE}{key.capitalize()}: {Colors.ENDC}{value}")
         max_type_length = max(len(layer['type']) for layer in self._config["layer"])
         max_input_length = max(len(str(layer['dim_in'])) 
                             for layer in self._config["layer"])
