@@ -8,7 +8,6 @@ The user can provide a directory of folder, to compare in the generated report.
 In this README there is a set up guide for how to set up a correct python environment.
 Furthermore there is a guide to show the usecase of the project.
 
-
 # Project Setup Guide
 
 ## Setting Up a Python Virtual Environment
@@ -37,3 +36,8 @@ This guide will walk you through the process of setting up a virtual environment
 4. **Install the requirementes**
     ```bash
     pip install -r requirements.txt
+
+
+
+
+https://github.com/ivholmlu/DynamicNNBuilder/assets/89637692/a9eae95e-d3f4-4284-902e-a3c1fbb7ed80
