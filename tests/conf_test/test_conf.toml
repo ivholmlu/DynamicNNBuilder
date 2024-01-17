@@ -1,0 +1,27 @@
+# Example configuration file
+[settings]
+learning_rate = 0.001
+batch_size = 64
+iterations = 3
+# SHOULD NOT BE REWRITTEN!!
+
+[[layer]]
+type = 'dense'
+dims = [784, 512]
+dim_in = 784
+dim_out = 512
+activation = 'relu'
+
+[[layer]]
+type = 'dense'
+dims = [512, 256]
+dim_in = 512
+dim_out = 256
+activation = 'relu'
+
+[[layer]]
+type = 'dense'
+dims = [256, 10]
+dim_in = 256
+dim_out = 10
+activation = 'linear'

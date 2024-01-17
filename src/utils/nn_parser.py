@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from pathlib import Path
+
 
 class NN_parser_factory:
 

@@ -2,10 +2,9 @@ import torch
 import toml
 import torch.nn as nn
 
-from network.network import NeuralNetwork
-from network.layers import LayerFactory
-from utils.loader import Loader
-from utils.conf_handler import ConfigHandler
+from .network import NeuralNetwork
+from ..utils.loader import Loader
+from ..utils.conf_handler import ConfigHandler
 
 class Colors:
     HEADER = '\033[95m'

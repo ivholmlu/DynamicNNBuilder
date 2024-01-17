@@ -1,0 +1,14 @@
+# Example configuration file
+[settings]
+learning_rate = 0.001
+batch_size = 64
+iterations = 3
+
+# define network architecture
+# possible layer types are 'dense', 'lowRank', and 'vanillaLowRank'
+# possible activations are 'relu', 'linear', 'sigmoid', 'tanh'
+[[layer]]
+type = 'dense'
+dim_in = 3
+dim_out = 3
+activation = 'linear'
