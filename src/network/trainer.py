@@ -5,6 +5,7 @@ import torch.nn as nn
 from .network import NeuralNetwork
 from ..utils.loader import Loader
 from ..utils.conf_handler import ConfigHandler
+import logging
 
 class Colors:
     HEADER = '\033[95m'
@@ -46,6 +47,7 @@ class Trainer:
         print(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%')
 
     def train(self, show_progress=True):
+        logging.debug("Start_training")
         for epoch in range(self._iterations):
             self.net.train()
             for batch, (images, labels) in enumerate(self._trainloader):

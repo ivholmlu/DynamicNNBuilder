@@ -4,10 +4,10 @@ from argparse import ArgumentParser
 from pathlib import Path
 import glob
 
-
+import logging
+logging.basicConfig(filename="logs.txt", level=10)
+#Default, can be defined by user 
 _config_path = "config.toml"
-#_config_path = "config_examples/config_4.toml"
-#_config_path = "config_examples/vanillalowrank.toml"
 _parameter_dir = "parameters"
 
 def main():
