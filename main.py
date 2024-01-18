@@ -2,13 +2,15 @@ from src.network.trainer import Trainer
 from src.utils.nn_parser import NN_parser_factory
 from pathlib import Path
 import glob
+import psutil
+
 
 import logging
 logging.basicConfig(filename="logs.log", level=10)
 # Default, can be defined by user
 _config_path = "config.toml"
 _parameter_dir = "parameters"
-import psutil
+
 
 def print_memory_usage():
     memory = psutil.virtual_memory()
@@ -28,7 +30,7 @@ def main():
         network = Trainer(create_net=False)
         par_path_load = _parameter_dir / args.load
         network.load_params(par_path_load)
-        network.load_test()
+        network.load_test() #Add args.r here as TRUE/FALSE #TODO
 
     else:
         # Creating list of toml files
@@ -41,13 +43,16 @@ def main():
 
         # Training on the provided toml files
         logo = True
+        wm = "w" #Setting write mode to overwrite
         for file in config_files:
             file = Path(file)
             network = Trainer(str(file))  # Training using config file.
             print_memory_usage()
-            network.show_arcitechture(logo=True)
+            #TODO Implement report generation
+            network.show_arcitechture(logo)
 
-            network.train()
+            network.train(report = args.report, writemode=wm) #TODO add args.r here
+            wm = "a" #Setting write mode to append
             if args.save:
                 parameter_dir = Path(_parameter_dir)
                 par_path_save = parameter_dir / (file.stem + ".pth")

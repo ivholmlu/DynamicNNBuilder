@@ -1,0 +1,82 @@
+Network Settings for: config_examples/vanillalowrank.toml
+Report for config_examples/vanillalowrank.toml
+ Input: 784 -  Output: 264
+ Activation: relu  Layer 1: dense         
+ Input: 264 -  Output: 264
+ Activation: relu  Layer 2: vanillalowrank
+ Input: 264 -  Output:  10
+ Activation: linearLayer 3: dense         
+----------------------------------------
+Epoch [1/10], Validation Accuracy: 85.38%
+Epoch [2/10], Validation Accuracy: 89.06%
+Epoch [3/10], Validation Accuracy: 90.47%
+Epoch [4/10], Validation Accuracy: 89.97%
+Epoch [5/10], Validation Accuracy: 90.58%
+Epoch [6/10], Validation Accuracy: 90.83%
+Epoch [7/10], Validation Accuracy: 91.62%
+Epoch [8/10], Validation Accuracy: 92.04%
+Epoch [9/10], Validation Accuracy: 92.45%
+Epoch [10/10], Validation Accuracy: 91.36%
+
+
+Network Settings for: config_examples/rewritten_config_2.toml
+Report for config_examples/rewritten_config_2.toml
+ Input: 784 -  Output: 512
+ Activation: relu  Layer 1: vanillalowrank
+ Input: 512 -  Output: 256
+ Activation: relu  Layer 2: vanillalowrank
+ Input: 256 -  Output:  10
+ Activation: linearLayer 3: dense         
+----------------------------------------
+Epoch [1/10], Validation Accuracy: 9.80%
+Epoch [2/10], Validation Accuracy: 9.80%
+Epoch [3/10], Validation Accuracy: 9.80%
+Epoch [4/10], Validation Accuracy: 9.80%
+Epoch [5/10], Validation Accuracy: 9.80%
+Epoch [6/10], Validation Accuracy: 9.80%
+Epoch [7/10], Validation Accuracy: 9.80%
+Epoch [8/10], Validation Accuracy: 9.80%
+Epoch [9/10], Validation Accuracy: 9.80%
+Epoch [10/10], Validation Accuracy: 9.80%
+
+
+Network Settings for: config_examples/config_lowrank.toml
+Report for config_examples/config_lowrank.toml
+ Input: 784 -  Output: 512
+ Activation: relu  Layer 1: dense  
+ Input: 512 -  Output: 264
+ Activation: relu  Layer 2: lowrank
+ Input: 264 -  Output:  10
+ Activation: linearLayer 3: dense  
+----------------------------------------
+Epoch [1/10], Validation Accuracy: 87.35%
+Epoch [2/10], Validation Accuracy: 91.00%
+Epoch [3/10], Validation Accuracy: 91.09%
+Epoch [4/10], Validation Accuracy: 91.65%
+Epoch [5/10], Validation Accuracy: 92.06%
+Epoch [6/10], Validation Accuracy: 92.20%
+Epoch [7/10], Validation Accuracy: 92.25%
+Epoch [8/10], Validation Accuracy: 92.59%
+Epoch [9/10], Validation Accuracy: 93.00%
+Epoch [10/10], Validation Accuracy: 93.07%
+
+
+Network Settings for: config_examples/rewritten_config_1.toml
+Report for config_examples/rewritten_config_1.toml
+ Input: 784 -  Output: 512
+ Activation: relu  Layer 1: dense
+ Input: 512 -  Output: 256
+ Activation: relu  Layer 2: dense
+ Input: 256 -  Output:  10
+ Activation: linearLayer 3: dense
+----------------------------------------
+Epoch [1/10], Validation Accuracy: 43.39%
+Epoch [2/10], Validation Accuracy: 47.42%
+Epoch [3/10], Validation Accuracy: 54.77%
+Epoch [4/10], Validation Accuracy: 56.98%
+Epoch [5/10], Validation Accuracy: 58.62%
+Epoch [6/10], Validation Accuracy: 60.72%
+Epoch [7/10], Validation Accuracy: 62.91%
+Epoch [8/10], Validation Accuracy: 64.23%
+Epoch [9/10], Validation Accuracy: 65.98%
+Epoch [10/10], Validation Accuracy: 68.19%

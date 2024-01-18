@@ -22,9 +22,9 @@ class ConfigHandler:
             self._validate_key(settings, "batch_size", expected_format="integer", additional_info="Number of items to process at once.")
             self._validate_key(settings, "iterations", expected_format="integer", additional_info="Number of times to repeat the process.")
             self._validate_key(settings, "learning_rate", expected_format="float", additional_info="Rate at which learning occurs.")
-        except ConfigError as e:
-            # Here you should handle the error, like logging it or printing it
-            print(e) 
+        except KeyError as e:
+            print(f"{e}: Error in settings from toml file. Settings must contain batch_size, iterations, and learning_rate"
+                f"Provided keys: {self.config['settings'].keys()}")
 
     @staticmethod
     def _validate_key(dictionary, key, expected_format=None, additional_info=None):

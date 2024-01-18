@@ -3,15 +3,23 @@ import torch
 import torch.nn as nn
 from src.network.network import NeuralNetwork
 
+#Several different configurations with dense layers
 single_dense_layer = toml.load("tests/conf_test/test_network.toml")
 config = toml.load("tests/conf_test/test_conf.toml")
 test_network_relu = toml.load("tests/conf_test/test_network_relu.toml")
+test_dense = toml.load("tests/conf_test/teste_dense.toml")
 
-@pytest.mark.parametrize("config", [config, test_network_relu, single_dense_layer])
+@pytest.mark.parametrize("config", [config, test_network_relu, single_dense_layer, test_dense])
 def test_creations_b(conf):
     obj = NeuralNetwork(conf)
     for i, _ in enumerate(obj._layers):
         assert obj._layers[i]._b.size() == (conf["layer"][i]["dim_out"],)
+
+@pytest.mark.parametrize("config", [config, test_network_relu, single_dense_layer, test_dense])
+def test_creations_dense_W(conf):
+    obj = NeuralNetwork(conf)
+    for i, _ in enumerate(obj._layers):
+        assert obj._layers[i]._W.size() == (conf["layer"][i]["dim_in"], conf["layer"][i]["dim_out"])
 
 def test_forward():
     network = NeuralNetwork(single_dense_layer)
