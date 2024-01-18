@@ -5,10 +5,12 @@ import torch.nn as nn
 
 
 config = toml.load("tests/conf_test/test_conf.toml")
+test_network_relu = toml.load("tests/conf_test/test_conf.toml")
+test_network = toml.load("tests/conf_test/test_conf.toml")
 
-nn.ReLU()
 def test_layer_factory():
     dense_obj = Denselayer(config["layer"][0], lr=0)
+
 
 def test_creation_dense():
     dense_obj = Denselayer(config["layer"][0], lr=0)

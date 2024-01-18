@@ -1,3 +1,4 @@
+import time
 import torch
 import toml
 import torch.nn as nn
@@ -7,6 +8,16 @@ from ..utils.loader import Loader
 from ..utils.conf_handler import ConfigHandler
 import logging
 
+
+
+def time_it(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"Model executed in: {end_time - start_time:.4f} seconds".upper())
+        return result
+    return wrapper
 class Colors:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
@@ -46,6 +57,7 @@ class Trainer:
         accuracy = correct / total
         print(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%')
 
+    @time_it
     def train(self, show_progress=True):
         logging.debug("Start_training")
         for epoch in range(self._iterations):
@@ -135,7 +147,7 @@ class Trainer:
         torch.save(self.net.state_dict(), path)
         print(f"Parameters saved from {path.stem} to {path}")
 
-    def show_arcitechture(self):
+    def show_arcitechture(self, logo):
 
         art = """
         ______                             _      _   _ _   _______       _ _     _           
@@ -146,7 +158,8 @@ class Trainer:
         |___/  \__, |_| |_|\__,_|_| |_| |_|_|\___\_| \_\_| \_\____/ \__,_|_|_|\__,_|\___|_|   
                 __/ |                                                                         
                 |___/                                                                          """
-        print(art)
+        if logo:
+            print(art)
         # Calculating maximum lengths for alignment
         settings = self._config["settings"]
         print(f"{Colors.HEADER}Network Settings:{Colors.ENDC}")

@@ -4,6 +4,14 @@ import torch.nn as nn
 from src.network.network import NeuralNetwork
 
 single_dense_layer = toml.load("tests/conf_test/test_network.toml")
+config = toml.load("tests/conf_test/test_conf.toml")
+test_network_relu = toml.load("tests/conf_test/test_network_relu.toml")
+
+@pytest.mark.parametrize("config", [config, test_network_relu, single_dense_layer])
+def test_creations_b(conf):
+    obj = NeuralNetwork(conf)
+    for i, _ in enumerate(obj._layers):
+        assert obj._layers[i]._b.size() == (conf["layer"][i]["dim_out"],)
 
 def test_forward():
     network = NeuralNetwork(single_dense_layer)

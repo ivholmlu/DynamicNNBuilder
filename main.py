@@ -8,7 +8,17 @@ logging.basicConfig(filename="logs.log", level=10)
 # Default, can be defined by user
 _config_path = "config.toml"
 _parameter_dir = "parameters"
+import psutil
 
+def print_memory_usage():
+    memory = psutil.virtual_memory()
+    total_memory = memory.total / (1024 * 1024) # Convert to MB
+    used_memory = memory.used / (1024 * 1024) # Convert to MB
+    memory_percentage = memory.percent
+
+    print(f"Total Memory: {total_memory:.2f} MB")
+    print(f"Used Memory: {used_memory:.2f} MB")
+    print(f"Memory Usage: {memory_percentage}%")
 
 def main():
 
@@ -30,16 +40,19 @@ def main():
             config_files = [args.file]
 
         # Training on the provided toml files
+        logo = True
         for file in config_files:
             file = Path(file)
-
             network = Trainer(str(file))  # Training using config file.
-            network.show_arcitechture()
+            print_memory_usage()
+            network.show_arcitechture(logo=True)
+
             network.train()
             if args.save:
                 parameter_dir = Path(_parameter_dir)
                 par_path_save = parameter_dir / (file.stem + ".pth")
                 network.save(par_path_save)
+            logo = False
 
 
 if __name__ == "__main__":
