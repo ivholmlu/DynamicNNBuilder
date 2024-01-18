@@ -153,22 +153,27 @@ class LowRank(nn.Module):
             K = K - lr * dK
 
             self._U1.data , _ = torch.linalg.qr(K, "reduced") #R is not used
-
+            #U_new , _ = torch.linalg.qr(K, "reduced") #R is not used
             #Updating L
             L = torch.matmul(self._V, self._S.T)
             dL = torch.matmul(self._V.grad[:, :r], self._S.T)
             L = L - lr * dL
             self._V1.data , _ = torch.linalg.qr(L, "reduced") # R is not used
+            #V_new , _ = torch.linalg.qr(L, "reduced") # R is not used
 
             #Creating N and M
             #M = self._U1.T @ self._U
+            #M = torch.matmul(U_new.T, self._U)
             M = torch.matmul(self._U1.T, self._U)
             # N = self._V.T
+            #N = torch.matmul(self._V.T, V_new)
             N = torch.matmul(self._V.T, self._V1)
 
             # Updating S, U and V
             self._S.data = M @ self._S @ N
             self._U.data = self._U1
+            #self._U.data = U_new
+            #self._V.data = V_new
             self._V.data = self._V1
             self._b.data = self._b - lr * self._b.grad
 
@@ -180,6 +185,11 @@ class LowRank(nn.Module):
         # Update new S value (Done with new loss calculated)
         else:
             self._S.data = self._S - lr * self._S.grad
+            
+            #self._U.grad.zero_() #WORKS BETTER WITHOUT
+            #self._S.grad.zero_()
+            #self._V.grad.zero_()
+            #self._b.grad.zero_()
 
 
 
