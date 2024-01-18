@@ -47,6 +47,5 @@ def test_forward_with_relu():
 
     # Expected output should have non-negative values due to ReLU
     # Change these values according to the expected result after applying ReLU
-    print(Z)
     expected_output = torch.tensor([[0, 1, 0]], dtype=torch.int32)  # Update as necessary
     assert torch.equal(Z, expected_output)

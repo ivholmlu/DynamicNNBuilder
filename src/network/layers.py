@@ -28,8 +28,13 @@ class Denselayer(nn.Module):
         super(Denselayer, self).__init__()
         activation = ActivationFactory()
         if not load:
-            self._W = nn.Parameter(torch.randn(config["dim_in"], config["dim_out"]), requires_grad=True)
-            self._b = nn.Parameter(torch.randn(config["dim_out"]), requires_grad=True)
+            self._W = nn.Parameter(torch.randn(
+                config["dim_in"],
+                config["dim_out"]),
+                requires_grad=True)
+            self._b = nn.Parameter(torch.randn(
+                config["dim_out"]),
+                requires_grad=True)
 
             self.activation = activation(config["activation"])
             self.lr = lr
@@ -56,10 +61,14 @@ class VanillaLowRank(nn.Module):
         super(VanillaLowRank, self).__init__()
         activation = ActivationFactory()
         if not load:
-            self._U = nn.Parameter(torch.randn(config["dim_in"], config["rank"]), requires_grad=True)
-            self._S = nn.Parameter(torch.randn(config["rank"], config["rank"]), requires_grad=True)
-            self._V = nn.Parameter(torch.randn(config["dim_out"], config["rank"]), requires_grad=True)
-            self._b = nn.Parameter(torch.randn(config["dim_out"]), requires_grad=True)
+            self._U = nn.Parameter(torch.randn(
+                config["dim_in"], config["rank"]), requires_grad=True)
+            self._S = nn.Parameter(torch.randn(
+                config["rank"], config["rank"]), requires_grad=True)
+            self._V = nn.Parameter(torch.randn(
+                config["dim_out"], config["rank"]), requires_grad=True)
+            self._b = nn.Parameter(torch.randn(
+                config["dim_out"]), requires_grad=True)
 
             U1, _ = torch.linalg.qr(self._U, 'reduced')
             V1, _ = torch.linalg.qr(self._V, 'reduced')
@@ -88,6 +97,7 @@ class VanillaLowRank(nn.Module):
             self._S.data = self._S - self.lr * self._S.grad
             self._V.data = self._V - self.lr * self._V.grad
             self._b.data = self._b - self.lr * self._b.grad
+
             self._U.grad.zero_()
             self._S.grad.zero_()
             self._V.grad.zero_()
@@ -114,9 +124,11 @@ class LowRank(nn.Module):
             self._U.data = U1
             self._V.data = V1
 
-            self._U1 = nn.Parameter(torch.randn(config["dim_in"], self._r), requires_grad=False)
-            self._V1 = nn.Parameter(torch.randn(config["dim_out"], self._r), requires_grad=False)
-        
+            self._U1 = nn.Parameter(torch.randn(
+                config["dim_in"], self._r), requires_grad=False)
+            self._V1 = nn.Parameter(torch.randn(
+                config["dim_out"], self._r), requires_grad=False)
+
         else:
             self._U = config["_U"]
             self._S = config["_S"]
@@ -158,6 +170,6 @@ class LowRank(nn.Module):
             self._S.grad.zero_()
             self._V.grad.zero_()
             self._b.grad.zero_()
-            
+
         else:
             self._S.data = self._S - lr * self._S.grad
