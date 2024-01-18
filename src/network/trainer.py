@@ -2,11 +2,13 @@ import time
 import torch
 import toml
 import torch.nn as nn
+import logging
+from pathlib import Path
 
 from .network import NeuralNetwork
 from ..utils.loader import Loader
 from ..utils.conf_handler import ConfigHandler
-import logging
+
 
 
 
@@ -32,11 +34,11 @@ class Trainer:
     """
     def __init__(self, conf_path="config.toml", create_net =True) -> None:
 
-        self._config = toml.load(conf_path)
+        self._config_path = conf_path
+        self._config = toml.load(self._config_path)
         conf_handler = ConfigHandler(self._config)
         conf_handler.check_config()
         if create_net:
-            
             self.net = NeuralNetwork(self._config)
             self._iterations = self._config["settings"]["iterations"]
             self._criterion = nn.CrossEntropyLoss() #TODO Create a criterion factory
@@ -45,7 +47,7 @@ class Trainer:
         self._trainloader, self._testloader = loader.load_dataset(self._config)
         self.device = torch.device("cpu")
 
-    def test(self, epoch=1):
+    def test(self, epoch=1, report=False, wm="w"):
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -56,9 +58,18 @@ class Trainer:
         
         accuracy = correct / total
         print(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%')
+        if report:
+            #Write result to report/report.txt
+            with open("report/report.txt", wm) as f:
+                f.write(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%\n')
 
     @time_it
-    def train(self, show_progress=True):
+    def train(self, show_progress=True, report=False, writemode="w"):
+
+        if report:
+            self.report_header(writemode)
+            writemode = "a"
+            
         logging.debug("Start_training")
         for epoch in range(self._iterations):
             self.net.train()
@@ -80,6 +91,8 @@ class Trainer:
                 if self.net._contains_lowrank:
                     #Forward pass
                     out = self.net(images)
+
+                    #Calculating loss based on criterion
                     loss = self._criterion(out, labels)
                     
                     #Calculate gradients
@@ -92,9 +105,9 @@ class Trainer:
                     print(f"Epoch [{epoch+1}/{self._iterations}] "
                             f"Step [{batch+1}/{len(self._trainloader)}] "
                             f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
-                    
+            
             if show_progress:
-                self.test(epoch)
+                self.test(epoch, report=report, wm=writemode)
 
     def load_params(self, path):
         """Loading parameters from path into self.net to be used on predictions"""
@@ -161,8 +174,9 @@ class Trainer:
         if logo:
             print(art)
         # Calculating maximum lengths for alignment
+
         settings = self._config["settings"]
-        print(f"{Colors.HEADER}Network Settings:{Colors.ENDC}")
+        print(f"{Colors.HEADER}Network Settings for: {Colors.ENDC}{self._config_path}")
         for key, value in settings.items():
             print(f"{Colors.BLUE}{key.capitalize()}: {Colors.ENDC}{value}")
         max_type_length = max(len(layer['type']) for layer in self._config["layer"])
@@ -188,6 +202,41 @@ class Trainer:
                         f"{Colors.YELLOW}Output: {Colors.ENDC}{layer_output}, "
                         f"{Colors.RED}Activation: {Colors.ENDC}{activation}")
             print(layer_str)
+    
+
+    def report_header(self, writemode):
+        #Check if report folder exists and create if not.
+            Path("report").mkdir(parents=True, exist_ok=True)
+
+            settings = self._config["settings"]
+            header = f"Network Settings for: {self._config_path}"
+            for key, value in settings.items():
+                print(f"{key.capitalize()} : {value}")
+            max_type_length = max(len(layer['type']) for layer in self._config["layer"])
+            max_input_length = max(len(str(layer['dim_in'])) 
+                                for layer in self._config["layer"])
+            max_output_length = max(len(str(layer['dim_out'])) 
+                                    for layer in self._config["layer"])
+            max_activation_length = max(len(layer['activation']) if layer['activation'] 
+                                        else 0 for layer in self._config["layer"])
+            # Iterating over layers to print details
+            with open("report/report.txt", writemode) as f:
+                if not writemode == "w":
+                    f.write("\n\n")
+                f.write(header+"\n")
+                f.write(f"Report for {self._config_path}\n")
+                for i, layer in enumerate(self._config["layer"], 1):
+                    layer_type = layer['type'].ljust(max_type_length)
+                    layer_input = str(layer['dim_in']).rjust(max_input_length)
+                    layer_output = str(layer['dim_out']).rjust(max_output_length)
+                    activation = (layer['activation'] if layer['activation'] else 'None')
+                    activation = activation.ljust(max_activation_length)
+                    layer_str = (f" Input: {layer_input} -  "
+                                f"Output: {layer_output}\n"
+                                f" Activation: {activation}"
+                                f"Layer {i}: {layer_type}\n")
+                    f.write(layer_str)
+                f.write("----------------------------------------\n")
 
 
 
