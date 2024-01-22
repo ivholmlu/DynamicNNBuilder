@@ -3,23 +3,23 @@ import torch.nn as nn
 
 
 class ActivationFactory:
-    def __init__(self):
+    def __init__(self) -> None:
         try:
             self.activations = {"relu": nn.ReLU(), "linear": nn.Identity()}
         except KeyError as e:
             print(f"Activation {e} is not a defined activation")
 
-    def __call__(self, type):
+    def __call__(self, type) -> nn.Module:
         return self.activations[type]
 
 
-class LayerFactory:
-    def __init__(self):
+class LayerFactory: 
+    def __init__(self)-> None:
         self.classes = {"dense": Denselayer,
                         "vanillalowrank": VanillaLowRank,
                         "lowrank": LowRank}
 
-    def __call__(self, config, lr=0, load=False):
+    def __call__(self, config, lr=0, load=False) -> nn.Module:
         return self.classes[config["type"]](config, lr, load)
 
 
@@ -86,12 +86,12 @@ class VanillaLowRank(nn.Module):
 
             self.activation = activation(config["activation"])
 
-    def forward(self, X):
+    def forward(self, X) -> torch.Tensor:
         W = torch.matmul(torch.matmul(self._U, self._S), self._V.T)
         return self.activation(torch.matmul(X, W) + self._b)
 
     @torch.no_grad()
-    def step(self, s):
+    def step(self, s) -> None:
         if not s:
             self._U.data = self._U - self.lr * self._U.grad
             self._S.data = self._S - self.lr * self._S.grad
@@ -135,7 +135,7 @@ class LowRank(nn.Module):
             self._V = config["_V"]
             self._b = config["_b"]
 
-    def forward(self, X):
+    def forward(self, X) -> torch.Tensor:
         r = self._r
         xU = torch.matmul(X, self._U[:, :r])
         xUS = torch.matmul(xU, self._S[:r, :r])
@@ -143,7 +143,7 @@ class LowRank(nn.Module):
         return self.activation(out)
 
     @torch.no_grad()
-    def step(self, s):
+    def step(self, s) -> None:
         lr = self.lr
 
         if not s:

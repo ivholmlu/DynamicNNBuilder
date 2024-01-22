@@ -46,8 +46,10 @@ class Trainer:
         loader = Loader()
         self._trainloader, self._testloader = loader.load_dataset(self._config)
         self.device = torch.device("cpu")
+        self.best_accuracy = 0
+        self.best_epoch = None
 
-    def test(self, epoch=1, report=False, wm="w"):
+    def test(self, epoch=1, report=False, wm="w", save=False):
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -58,13 +60,22 @@ class Trainer:
         
         accuracy = correct / total
         print(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%')
+        if self.best_accuracy < accuracy:
+            self.best_accuracy = accuracy
+            self.best_epoch = epoch
+            if save:
+                conf_path = Path(self._config_path)
+                self.save(Path(f"parameters/{conf_path.stem}.pth"))
         if report:
             #Write result to report/report.txt
             with open("report/report.txt", wm) as f:
                 f.write(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%\n')
+                if epoch+1 == self._iterations:
+                    f.write(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
+                    f.write("----------------------------------------\n")
 
     @time_it
-    def train(self, show_progress=True, report=False, writemode="w"):
+    def train(self, show_progress=True, report=False, writemode="w", save=False):
 
         if report:
             self.report_header(writemode)
@@ -105,9 +116,20 @@ class Trainer:
                     print(f"Epoch [{epoch+1}/{self._iterations}] "
                             f"Step [{batch+1}/{len(self._trainloader)}] "
                             f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
+                
+            self.test(epoch, report=report, wm=writemode, save=save)
+        
+        print(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
+        if report:
+            self.show_best_accuracy()
+
             
-            if show_progress:
-                self.test(epoch, report=report, wm=writemode)
+    def show_best_accuracy(self):
+        print(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
+        with open("report/report.txt", "a") as f: #TODO Generalise this
+            f.write(f"{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}%")
+            f.write("at epoch {self.best_epoch+1}{Colors.ENDC}\n")
+            f.write("----------------------------------------\n")
 
     def load_params(self, path):
         """Loading parameters from path into self.net to be used on predictions"""
@@ -154,6 +176,7 @@ class Trainer:
         
         accuracy = correct / total
         print(f'Validation Accuracy: {100 * accuracy:.2f}%')
+
     def save(self, path):
         #print(self.net.state_dict())
         #print(self.net.state_dict().keys())
