@@ -18,7 +18,7 @@ def main() -> None:
     args = NN_parser_factory(_config_path)()
 
     if args.load:  # Run if weights should be loaded
-        network = Trainer(create_net=False)
+        network = Trainer(create_net=False, parameter_path=args.load)
         par_path_load = parameter_dir / args.load
         network.load_params(par_path_load)
         network.load_test()  #Add args.r here as TRUE/FALSE #TODO

@@ -32,7 +32,7 @@ class Colors:
 class Trainer:
     """Object for training a neural network.
     """
-    def __init__(self, conf_path="config.toml", create_net =True) -> None:
+    def __init__(self, conf_path="config.toml", create_net =True, parameter_path = None) -> None:
 
         self._config_path = conf_path
         self._config = toml.load(self._config_path)
@@ -43,6 +43,8 @@ class Trainer:
             self._iterations = self._config["settings"]["iterations"]
             self._criterion = nn.CrossEntropyLoss() #TODO Create a criterion factory
         
+        if not create_net:
+            self.parameter_path = Path(parameter_path)
         loader = Loader()
         self._trainloader, self._testloader = loader.load_dataset(self._config)
         self.device = torch.device("cpu")
@@ -175,7 +177,9 @@ class Trainer:
             correct += (predicted == labels).sum().item()
         
         accuracy = correct / total
+        print(f"Testing parameters from {self.parameter_path.stem}")
         print(f'Validation Accuracy: {100 * accuracy:.2f}%')
+        print(f"Tested on {total} images")
 
     def save(self, path) -> None:
         #print(self.net.state_dict())
