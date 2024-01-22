@@ -49,7 +49,7 @@ class Trainer:
         self.best_accuracy = 0
         self.best_epoch = None
 
-    def test(self, epoch=1, report=False, wm="w", save=False):
+    def test(self, epoch=1, report=False, wm="w", save=False) -> None:
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -75,7 +75,7 @@ class Trainer:
                     f.write("----------------------------------------\n")
 
     @time_it
-    def train(self, show_progress=True, report=False, writemode="w", save=False):
+    def train(self, show_progress=True, report=False, writemode="w", save=False) -> None:
 
         if report:
             self.report_header(writemode)
@@ -119,19 +119,19 @@ class Trainer:
                 
             self.test(epoch, report=report, wm=writemode, save=save)
         
-        print(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
+        print(f"{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {Colors.ENDC}{self.best_epoch+1}\n")
         if report:
             self.show_best_accuracy()
 
             
-    def show_best_accuracy(self):
+    def show_best_accuracy(self) -> None:
         print(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
         with open("report/report.txt", "a") as f: #TODO Generalise this
             f.write(f"{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}%")
             f.write("at epoch {self.best_epoch+1}{Colors.ENDC}\n")
             f.write("----------------------------------------\n")
 
-    def load_params(self, path):
+    def load_params(self, path) -> None:
         """Loading parameters from path into self.net to be used on predictions"""
         #load_dict =  torch.load(path)
 
@@ -165,7 +165,7 @@ class Trainer:
         "Layer dict contains keys for each layer." 
         "Key contains dictionary with key for type, activatioon and attributes which contains key for attribute and value"
 
-    def load_test(self, epoch=1):
+    def load_test(self, epoch=1) -> None:
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -177,13 +177,13 @@ class Trainer:
         accuracy = correct / total
         print(f'Validation Accuracy: {100 * accuracy:.2f}%')
 
-    def save(self, path):
+    def save(self, path) -> None:
         #print(self.net.state_dict())
         #print(self.net.state_dict().keys())
         torch.save(self.net.state_dict(), path)
         print(f"Parameters saved from {path.stem} to {path}")
 
-    def show_arcitechture(self, logo):
+    def show_arcitechture(self, logo) -> None:
 
         art = """
         ______                             _      _   _ _   _______       _ _     _           
@@ -227,7 +227,7 @@ class Trainer:
             print(layer_str)
     
 
-    def report_header(self, writemode):
+    def report_header(self, writemode) -> None:
         #Check if report folder exists and create if not.
             Path("report").mkdir(parents=True, exist_ok=True)
 

@@ -1,9 +1,10 @@
+import torch
 import torch.nn as nn
 from .layers import LayerFactory
 
 class NeuralNetwork(nn.Module):
 
-    def __init__(self, config, create_net=True):
+    def __init__(self, config, create_net=True) -> None:
         super(NeuralNetwork, self).__init__()
         self.flatten = nn.Flatten()
         self._layers = nn.Sequential()
@@ -23,12 +24,12 @@ class NeuralNetwork(nn.Module):
             for layer_num in config:
                 self._layers.add_module(name = f"layer_{layer_num}_{config[layer_num]['type']}_{config[layer_num]['activation']}",
                                 module =LF(config[layer_num], load=True))
-    def forward(self, Z):
+    def forward(self, Z) -> torch.Tensor:
         Z = self.flatten(Z)
         for layer in self._layers:
             Z = layer(Z)
         return Z
     
-    def step(self, s=False):
+    def step(self, s=False) -> None:
         for layer in self._layers:
             layer.step(s)
