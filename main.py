@@ -24,6 +24,8 @@ def print_memory_usage():
 
 def main():
 
+    parameter_dir = Path(_parameter_dir) #Used for saving parameters
+
     args = NN_parser_factory(_config_path)()
 
     if args.load:  # Run if weights should be loaded
@@ -33,31 +35,26 @@ def main():
         network.load_test()  #Add args.r here as TRUE/FALSE #TODO
 
     else:
-        # Creating list of toml files
+        # Creating list of toml files, either from a directory or a single file
         if Path(args.file).is_dir():
-            # Path is a directory, find all .toml files
             config_files = glob.glob(f"{args.file}/*.toml")
         else:
-            # Path is a specific file
             config_files = [args.file]
 
-        # Training on the provided toml files
-        logo = True
+        logo = True 
         wm = "w" #Setting write mode to overwrite
         for file in config_files:
             file = Path(file)
             network = Trainer(str(file))  # Training using config file.
             print_memory_usage()
-            #TODO Implement report generation
             network.show_arcitechture(logo)
-
-            network.train(report = args.report, writemode=wm) #TODO add args.r here
-            wm = "a" #Setting write mode to append
-            if args.save:
-                parameter_dir = Path(_parameter_dir)
+            network.train(report = args.report, writemode=wm, save = args.save)
+            wm = "a" 
+            if args.save: #NEEDS TO BE IN TRAIN
                 par_path_save = parameter_dir / (file.stem + ".pth")
                 network.save(par_path_save)
             logo = False
+        
 
 
 if __name__ == "__main__":
