@@ -19,7 +19,7 @@ def main() -> None:
 
     if args.load:  # Run if weights should be loaded
         network = Trainer(create_net=False)
-        par_path_load = _parameter_dir / args.load
+        par_path_load = parameter_dir / args.load
         network.load_params(par_path_load)
         network.load_test()  #Add args.r here as TRUE/FALSE #TODO
 
@@ -40,7 +40,5 @@ def main() -> None:
             wm = "a" 
             logo = False
         
-
-
 if __name__ == "__main__":
     main()

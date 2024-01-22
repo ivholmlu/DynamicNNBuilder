@@ -83,6 +83,7 @@ class VanillaLowRank(nn.Module):
             self._S = config["attributes"]['_S']
             self._V = config["attributes"]["_V"]
             self._b = config["attributes"]["_b"]
+            self._r = self._S.size()[0]
 
             self.activation = activation(config["activation"])
 
@@ -107,7 +108,7 @@ class VanillaLowRank(nn.Module):
 class LowRank(nn.Module):
     def __init__(self, config, lr, load=False) -> None:
         super(LowRank, self).__init__()
-
+        activation = ActivationFactory()
         if not load:
             self._r = config["rank"]
             self.lr = lr
@@ -130,10 +131,12 @@ class LowRank(nn.Module):
                 config["dim_out"], self._r), requires_grad=False)
 
         else:
-            self._U = config["_U"]
-            self._S = config["_S"]
-            self._V = config["_V"]
-            self._b = config["_b"]
+            self._U = config["attributes"]["_U"]
+            self._S = config["attributes"]["_S"]
+            self._V = config["attributes"]["_V"]
+            self._b = config["attributes"]["_b"]
+            self._r = self._S.size()[0]
+            self.activation = activation(config["activation"])
 
     def forward(self, X) -> torch.Tensor:
         r = self._r
