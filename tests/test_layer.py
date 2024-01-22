@@ -24,8 +24,6 @@ def test_creation_dense(): #TODO rewrite for vanilla and lowrank
     assert dense_obj._b.size() == (512,)
     assert dense_obj._W.size() == (784, 512)
 
-
-
 def test_config():
     assert config["layer"][0]["type"] == "dense"
     assert config["layer"][0]["dims"] == [784, 512]

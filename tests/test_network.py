@@ -49,3 +49,9 @@ def test_forward_with_relu():
     # Change these values according to the expected result after applying ReLU
     expected_output = torch.tensor([[0, 1, 0]], dtype=torch.int32)  # Update as necessary
     assert torch.equal(Z, expected_output)
+
+several_layer = toml.load("tests/conf_test/several_layer.toml")
+
+def test_entire_network_creation():
+    network = NeuralNetwork(several_layer)
+    assert len(network._layers) == 3
