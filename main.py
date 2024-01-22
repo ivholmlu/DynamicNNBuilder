@@ -14,8 +14,8 @@ _parameter_dir = "parameters"
 
 def print_memory_usage():
     memory = psutil.virtual_memory()
-    total_memory = memory.total / (1024 * 1024) # Convert to MB
-    used_memory = memory.used / (1024 * 1024) # Convert to MB
+    total_memory = memory.total / (1024 * 1024)  # Convert to MB
+    used_memory = memory.used / (1024 * 1024)  # Convert to MB
     memory_percentage = memory.percent
 
     print(f"Total Memory: {total_memory:.2f} MB")
@@ -26,11 +26,11 @@ def main():
 
     args = NN_parser_factory(_config_path)()
 
-    if args.load:  # Run if
+    if args.load:  # Run if weights should be loaded
         network = Trainer(create_net=False)
         par_path_load = _parameter_dir / args.load
         network.load_params(par_path_load)
-        network.load_test() #Add args.r here as TRUE/FALSE #TODO
+        network.load_test()  #Add args.r here as TRUE/FALSE #TODO
 
     else:
         # Creating list of toml files
