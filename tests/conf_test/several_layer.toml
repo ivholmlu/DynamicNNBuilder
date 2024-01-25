@@ -1,0 +1,32 @@
+[settings]
+learning_rate = 0.001
+batch_size = 64
+iterations = 3
+
+# define network architecture
+# possible layer types are 'dense', 'lowRank', and 'vanillaLowRank'
+# possible activations are 'relu', 'linear', 'sigmoid', 'tanh'
+[[layer]]
+type = 'dense'
+dim_in = 784
+dim_out = 512
+activation = 'relu'
+
+[[layer]]
+type = 'lowRank'
+dim_in = 512
+dim_out = 512
+activation = 'relu'
+rank = 30
+
+[[layer]]
+type = 'vanillaLowRank'
+dim_in = 512
+dim_out = 264
+activation = 'relu'
+
+[[layer]]
+type = 'dense'
+dim_in = 264
+dim_out = 10
+activation = 'linear'

@@ -38,6 +38,30 @@ This guide will walk you through the process of setting up a virtual environment
     pip install -r requirements.txt
 
 
+### How to use the DynamicNNBuilder
+
+To run the default config file in main folder use:
+
+`python main.py`
+
+To define a specific toml or folder with toml files use:
+
+`python main.py -f path_to_file_or_folder.toml`
+
+To save at a specific location, use:
+
+`python main.py -l path_to_save_location`
+
+You can specify where the report should be saved with:
+
+`python main.py -rd report_save_path`
+
+**!!! UNDER DEVELOPMENT !!!**
+
+To easily(well not yet) create and then run toml file, use:
+
+`python check.py`
+
+This uses the tkinter library to make the toml file you want to run.
 
 
-https://github.com/ivholmlu/DynamicNNBuilder/assets/89637692/a9eae95e-d3f4-4284-902e-a3c1fbb7ed80
