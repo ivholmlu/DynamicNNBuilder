@@ -27,6 +27,7 @@ class Denselayer(nn.Module):
     def __init__(self, config, lr, load=False) -> None:
         super(Denselayer, self).__init__()
         activation = ActivationFactory()
+        
         if not load:
             self._W = nn.Parameter(torch.randn(
                 config["dim_in"],
