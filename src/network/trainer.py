@@ -228,6 +228,8 @@ class Trainer:
                         f"{Colors.GREEN}Input: {Colors.ENDC}{layer_input}, "
                         f"{Colors.YELLOW}Output: {Colors.ENDC}{layer_output}, "
                         f"{Colors.RED}Activation: {Colors.ENDC}{activation}")
+            if layer['type'] == "lowrank":
+                layer_str += f"{Colors.CYAN}Rank: {Colors.ENDC}{layer['rank']}"
             print(layer_str)
     
 
