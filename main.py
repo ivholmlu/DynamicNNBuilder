@@ -4,10 +4,10 @@ from pathlib import Path
 import glob
 import logging
 
-_config_path = "config.toml"
+_config_path = "configs/config.toml"
 _parameter_dir = "parameters"
 
-logging.basicConfig(filename="logs.log", level=40)
+logging.basicConfig(filename="report/logs.log", level=40)
 
 
 def main() -> None:

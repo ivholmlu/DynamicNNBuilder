@@ -1,0 +1,24 @@
+[settings]
+learning_rate = 0.0001
+batch_size = 64
+iterations = 10
+
+[[layer]]
+type = "lowrank"
+dim_in = 784
+dim_out = 512
+activation = "relu"
+rank = 20
+
+[[layer]]
+type = "lowrank"
+dim_in = 512
+dim_out = 256
+activation = "relu"
+rank = 20
+
+[[layer]]
+type = "dense"
+dim_in = 256
+dim_out = 10
+activation = "linear"
