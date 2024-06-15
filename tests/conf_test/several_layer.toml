@@ -13,17 +13,18 @@ dim_out = 512
 activation = 'relu'
 
 [[layer]]
-type = 'lowRank'
+type = 'lowrank'
 dim_in = 512
 dim_out = 512
 activation = 'relu'
 rank = 30
 
 [[layer]]
-type = 'vanillaLowRank'
+type = 'vanillalowrank'
 dim_in = 512
 dim_out = 264
 activation = 'relu'
+rank=20
 
 [[layer]]
 type = 'dense'
