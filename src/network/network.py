@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from .layers import LayerFactory
 
+
 class NeuralNetwork(nn.Module):
 
     def __init__(self, config, create_net=True) -> None:
