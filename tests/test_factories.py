@@ -2,7 +2,7 @@ from src.network.layers import Denselayer, VanillaLowRank, LowRank, ActivationFa
 import toml
 import torch.nn as nn
 
-config = toml.load("tests/config_test/test_conf.toml")
+config = toml.load("tests/conf_test/test_conf.toml")
 
 def test_creation_layerfactory():
     layerfactory = LayerFactory()
