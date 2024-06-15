@@ -18,17 +18,17 @@ class NN_parser_factory:
             help='Load the parameters with the provided filename')
         self.parser.add_argument(
             '-k', '--kaggle',
-            type=bool, default=False, 
+            type=bool, default=False,
             help="Use network to create csv prediction for Kaggle comp")
         self.parser.add_argument(
             '-cd', '--conf_dir',
             type=str,
             help='Path to folder with dir with .toml files for configurations')
         self.parser.add_argument(
-            '-r', '--report', 
+            '-r', '--report',
             type=bool, default=False, help='Flag for creating report')
         self.parser.add_argument(
-            '-rd', '--report_dir', type=str, default="report", 
+            '-rd', '--report_dir', type=str, default="report",
             help='Path to folder where report will be saved')
         self.args = self.parser.parse_args()
 
