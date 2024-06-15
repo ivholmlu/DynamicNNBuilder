@@ -2,12 +2,13 @@ import toml
 import torch
 import torch.nn as nn
 from src.network.network import NeuralNetwork
+import pytest
 
 #Several different configurations with dense layers
 single_dense_layer = toml.load("tests/conf_test/test_network.toml")
 config = toml.load("tests/conf_test/test_conf.toml")
 test_network_relu = toml.load("tests/conf_test/test_network_relu.toml")
-test_dense = toml.load("tests/conf_test/teste_dense.toml")
+test_dense = toml.load("tests/conf_test/test_dense.toml")
 
 @pytest.mark.parametrize("config", [config, test_network_relu, single_dense_layer, test_dense])
 def test_creations_b(conf):
