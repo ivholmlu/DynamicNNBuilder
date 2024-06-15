@@ -32,14 +32,14 @@ def main() -> None:
         else:
             config_files = [args.file]
 
-        logo = True 
+        logo = True
         wm = "w"  # Setting write mode to overwrite
         for file in config_files:
             file = Path(file)
             network = Trainer(str(file))  # Training using config file.
             network.show_arcitechture(logo)
             network.train(report=args.report, writemode=wm, save=args.save)
-            wm = "a" 
+            wm = "a"
             logo = False
 
     logging.log(40, "Program ended")

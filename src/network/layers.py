@@ -13,8 +13,8 @@ class ActivationFactory:
         return self.activations[type]
 
 
-class LayerFactory: 
-    def __init__(self)-> None:
+class LayerFactory:
+    def __init__(self) -> None:
         self.classes = {"dense": Denselayer,
                         "vanillalowrank": VanillaLowRank,
                         "lowrank": LowRank}
@@ -27,7 +27,7 @@ class Denselayer(nn.Module):
     def __init__(self, config, lr, load=False) -> None:
         super(Denselayer, self).__init__()
         activation = ActivationFactory()
-        
+
         if not load:
             self._W = nn.Parameter(torch.randn(
                 config["dim_in"],

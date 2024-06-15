@@ -1,4 +1,4 @@
-from src.network.layers import Denselayer, VanillaLowRank, LowRank, ActivationFactory, LayerFactory, ActivationFactory, LayerFactory
+import src.network.layers as layers
 import toml
 import torch.nn as nn
 
@@ -27,21 +27,21 @@ dim_out = 10
 activation = 'linear'
 """
 
+
 def test_creation_layerfactory():
-    layerfactory = LayerFactory()
-    assert layerfactory.classes == {"dense": Denselayer,
-                                    "vanillalowrank": VanillaLowRank,
-                                    "lowrank": LowRank}
+    layerfactory = layers.LayerFactory()
+    assert layerfactory.classes == {"dense": layers.Denselayer,
+                                    "vanillalowrank": layers.VanillaLowRank,
+                                    "lowrank": layers.LowRank}
 
 
 def test_return_layerfactory():
-    layerfactory = LayerFactory()
+    layerfactory = layers.LayerFactory()
     layer = layerfactory(config["layer"][0])
-    assert isinstance(layer, Denselayer)
-    
+    assert isinstance(layer, layers.Denselayer)
 
-    
+
 def test_return_activationfactory():
-    activationfactory = ActivationFactory()
+    activationfactory = layers.ActivationFactory()
     activation = activationfactory(config["layer"][0]["activation"])
     assert isinstance(activation, nn.ReLU)
