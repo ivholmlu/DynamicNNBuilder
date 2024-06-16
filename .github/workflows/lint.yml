@@ -18,10 +18,11 @@ jobs:
         run: |
           pip install flake8
           pip install pytest
+          pip install tox
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run flake8
-        run: flake8 .
+      - name: Run flake8 via tox #Run with tox so configs is seen(?)
+        run: tox -e flake8 .
 
       - name: Run tests
         run: pytest tests

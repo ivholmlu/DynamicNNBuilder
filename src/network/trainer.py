@@ -9,10 +9,15 @@ from .network import NeuralNetwork
 from ..utils.loader import Loader
 from ..utils.conf_handler import ConfigHandler
 
-
-
+REPORT_PATH = "report/report.txt"
 
 def time_it(func):
+    """
+    Wrapper for timing methods or functions
+
+    Args:
+        func (function): Function to time. @time_it can be used.
+    """
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
@@ -20,19 +25,29 @@ def time_it(func):
         print(f"Model executed in: {end_time - start_time:.4f} seconds".upper())
         return result
     return wrapper
+
+
 class Colors:
-    HEADER = '\033[95m'
+    """
+    Container for ANSI escape codes for terminal text coloring.
+    ENDC resets to default color.
+    """
+    HEADER = '\033[95m' #Bright magenta
     BLUE = '\033[94m'
     CYAN = '\033[96m'
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
-    ENDC = '\033[0m'  # Resets the color
+    ENDC = '\033[0m'  
+
 
 class Trainer:
-    """Object for training a neural network.
     """
-    def __init__(self, conf_path="config.toml", create_net =True, parameter_path = None) -> None:
+    Object for training a neural network.
+    """
+    def __init__(
+            self, conf_path="config.toml",
+            create_net=True, parameter_path=None) -> None:
 
         self._config_path = conf_path
         self._config = toml.load(self._config_path)
@@ -41,7 +56,8 @@ class Trainer:
         if create_net:
             self.net = NeuralNetwork(self._config)
             self._iterations = self._config["settings"]["iterations"]
-            self._criterion = nn.CrossEntropyLoss() #TODO Create a criterion factory
+            self._criterion = nn.CrossEntropyLoss()
+            # TODO Create a criterion factory
         
         if not create_net:
             self.parameter_path = Path(parameter_path)
@@ -59,9 +75,10 @@ class Trainer:
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-        
         accuracy = correct / total
-        print(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%')
+        epoch_text = f'Epoch [{epoch+1}/{self._iterations}],'
+        validation_text = f'Validation Accuracy: {100 * accuracy:.2f}%'
+        print(epoch_text + validation_text)
         if self.best_accuracy < accuracy:
             self.best_accuracy = accuracy
             self.best_epoch = epoch
@@ -69,9 +86,9 @@ class Trainer:
                 conf_path = Path(self._config_path)
                 self.save(Path(f"parameters/{conf_path.stem}.pth"))
         if report:
-            #Write result to report/report.txt
-            with open("report/report.txt", wm) as f:
-                f.write(f'Epoch [{epoch+1}/{self._iterations}], Validation Accuracy: {100 * accuracy:.2f}%\n')
+            # Write result to report/report.txt
+            with open(REPORT_PATH, wm) as f:
+                f.write(epoch_text + validation_text)
                 if epoch+1 == self._iterations:
                     f.write(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
                     f.write("----------------------------------------\n")
@@ -90,77 +107,72 @@ class Trainer:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
 
-                #Forward pass
+                # Forward pass
                 out = self.net(images)
                 loss = self._criterion(out, labels)
 
-                ### Update loss for network
+                # Update loss for network
                 loss.backward()
 
-                #Update network(Not s in lowrank)
+                # Update network(Not s in lowrank)
                 self.net.step(s=False)
-                
-                #Update S in lowrank if network contains lowrank layers.
+
+                # Update S in lowrank if network contains lowrank layers.
                 if self.net._contains_lowrank:
-                    #Forward pass
+                    # Forward pass
                     out = self.net(images)
 
-                    #Calculating loss based on criterion
+                    # Calculating loss based on criterion
                     loss = self._criterion(out, labels)
-                    
-                    #Calculate gradients
+
+                    # Calculate gradients
                     loss.backward()
 
-                    #Update coefficients
+                    # Update coefficients
                     self.net.step(s=True)
-                
+
                 if (batch + 1) % 100 == 0:
-                    print(f"Epoch [{epoch+1}/{self._iterations}] "
-                            f"Step [{batch+1}/{len(self._trainloader)}] "
-                            f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
-                
+                    print(
+                        f"Epoch [{epoch+1}/{self._iterations}] "
+                        f"Step [{batch+1}/{len(self._trainloader)}] "
+                        f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
+
             self.test(epoch, report=report, wm=writemode, save=save)
-        
+
         print(f"{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {Colors.ENDC}{self.best_epoch+1}\n")
         if report:
             self.show_best_accuracy()
 
-            
     def show_best_accuracy(self) -> None:
-        print(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
+        best_accuracy = f'Best accuracy: {100 * self.best_accuracy:.2f}%'
+        print(best_accuracy + f" at epoch {self.best_epoch+1}\n")
         with open("report/report.txt", "a") as f: #TODO Generalise this
-            f.write(f"{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}%")
+            f.write(f"{Colors.CYAN}" + best_accuracy)
             f.write("at epoch {self.best_epoch+1}{Colors.ENDC}\n")
             f.write("----------------------------------------\n")
 
     def load_params(self, path) -> None:
         """Loading parameters from path into self.net to be used on predictions"""
-        #load_dict =  torch.load(path)
+        # load_dict =  torch.load(path)
 
-        #Parsing load_dict into the network
+        # Parsing load_dict into the network
         network_dict = torch.load(path)
         layer_dict = {}
         for param in network_dict: #TODO Rewrite to function.
-            
+
             param_list = param.split('.')
             layer_idx = str(param_list[1].split('_')[1])
             layer_type = param_list[1].split('_')[2]
-            
             activation = param_list[1].split('_')[3]
-            
             attribute = param_list[2]
-            
-            
-            #Dictionary containing list with each layer information
+            # Dictionary containing list with each layer information
             if layer_idx not in layer_dict:
                 layer_dict[layer_idx] = {"type":layer_type, "activation": activation, "attributes": {}}
                 layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
 
             else:
-                
                 layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
-            
-        
+
         layer_dict = dict(sorted(layer_dict.items()))
         self.net = NeuralNetwork(layer_dict, create_net=False)
 
@@ -175,15 +187,15 @@ class Trainer:
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-        
+
         accuracy = correct / total
         print(f"Testing parameters from {self.parameter_path.stem}")
         print(f'Validation Accuracy: {100 * accuracy:.2f}%')
         print(f"Tested on {total} images")
 
     def save(self, path) -> None:
-        #print(self.net.state_dict())
-        #print(self.net.state_dict().keys())
+        # print(self.net.state_dict())
+        # print(self.net.state_dict().keys())
         torch.save(self.net.state_dict(), path)
         print(f"Parameters saved from {path.stem} to {path}")
 

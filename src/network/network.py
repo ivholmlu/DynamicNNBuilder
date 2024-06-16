@@ -24,7 +24,7 @@ class NeuralNetwork(nn.Module):
             self._layers = nn.Sequential()
             for layer_num in config:
                 self._layers.add_module(
-                    name=f"layer_{layer_num}_{config[layer_num]['type']}_"+
+                    name=f"layer_{layer_num}_{config[layer_num]['type']}_" +
                     "{config[layer_num]['activation']}",
                     module=LF(config[layer_num], load=True))
 
@@ -33,7 +33,7 @@ class NeuralNetwork(nn.Module):
         for layer in self._layers:
             Z = layer(Z)
         return Z
-    
+
     def step(self, s=False) -> None:
         for layer in self._layers:
             layer.step(s)
