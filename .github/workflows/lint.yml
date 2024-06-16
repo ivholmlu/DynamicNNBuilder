@@ -22,7 +22,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run flake8 via tox #Run with tox so configs is seen(?)
-        run: tox -e flake8 .
+        run: flake8 .
 
       - name: Run tests
         run: pytest tests
