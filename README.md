@@ -12,11 +12,11 @@ Furthermore there is a guide to show the usecase of the project.
 
 ## Setting Up a Python Virtual Environment
 
-This guide will walk you through the process of setting up a virtual environment for this project using Python 3.9.12.
+This guide will walk you through the process of setting up a virtual environment for this project using Python >= 3.9.12. During developement Python 3.9.12 was used.
 
 ### Prerequisites
 
-- Ensure you have Python 3.9.12 installed on your system.
+- Ensure you have >=Python 3.9.12 installed on your system.
 
 ### Creating and Activating the Virtual Environment
 
