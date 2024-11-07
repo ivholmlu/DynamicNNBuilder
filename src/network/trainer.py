@@ -9,7 +9,7 @@ from .network import NeuralNetwork
 from ..utils.loader import Loader
 from ..utils.conf_handler import ConfigHandler
 
-REPORT_PATH = "report/report.txt"
+_REPORT_PATH = "report/report.txt"
 
 def time_it(func):
     """
@@ -87,7 +87,7 @@ class Trainer:
                 self.save(Path(f"parameters/{conf_path.stem}.pth"))
         if report:
             # Write result to report/report.txt
-            with open(REPORT_PATH, wm) as f:
+            with open(_REPORT_PATH, wm) as f:
                 f.write(epoch_text + validation_text)
                 if epoch+1 == self._iterations:
                     f.write(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
@@ -278,6 +278,3 @@ class Trainer:
                                 f"Layer {i}: {layer_type}\n")
                     f.write(layer_str)
                 f.write("----------------------------------------\n")
-
-
-
