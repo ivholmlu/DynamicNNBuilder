@@ -55,6 +55,14 @@ class Denselayer(nn.Module):
             self._b.data = self._b - self.lr * self._b.grad
             self._W.grad.zero_()
             self._b.grad.zero_()
+    
+    @property
+    def b(self):
+        return self._b
+
+    @property
+    def W(self):
+        return self._W
 
 
 class VanillaLowRank(nn.Module):
