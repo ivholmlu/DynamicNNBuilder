@@ -38,3 +38,8 @@ class NeuralNetwork(nn.Module):
     def step(self, s=False) -> None:
         for layer in self._layers:
             layer.step(s)
+
+    @property
+    def layers(self):
+        return self._layers
+    
