@@ -2,13 +2,12 @@
 import time
 import torch
 import toml
-import torch.nn as nn
+from torch import nn
 import logging
 from pathlib import Path
-
 from .network import NeuralNetwork
-from ..utils.loader import Loader
-from ..utils.conf_handler import ConfigHandler
+from src.utils.loader import Loader
+from src.utils.conf_handler import ConfigHandler
 
 _REPORT_PATH = "report/report.txt"
 
@@ -29,18 +28,15 @@ def time_it(func):
     return wrapper
 
 
-class Colors:
-    """
-    Container for ANSI escape codes for terminal text coloring.
-    ENDC resets to default color.
-    """
-    HEADER = '\033[95m'  # Bright magenta
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
+COLORS = {
+    "HEADER": '\033[95m', # Bright magenta
+    "BLUE": '\033[94m',
+    "CYAN": '\033[96m',
+    "GREEN": '\033[92m',
+    "YELLOW": '\033[93m',
+    "RED": '\033[91m',
+    "ENDC": '\033[0m'
+}
 
 
 class Trainer:
@@ -70,6 +66,7 @@ class Trainer:
         self.best_epoch = None
 
     def test(self, epoch=1, report=False, wm="w", save=False) -> None:
+        """Test the network on the test set"""
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -98,6 +95,7 @@ class Trainer:
 
     @time_it
     def train(self, show_progress=True, report=False, writemode="w", save=False) -> None:
+        """Train the network"""
 
         if report:
             self.report_header(writemode)
@@ -121,7 +119,7 @@ class Trainer:
                 self.net.step(s=False)
 
                 # Update S in lowrank if network contains lowrank layers.
-                if self.net._contains_lowrank:
+                if self.net.contains_lowrank:
                     # Forward pass
                     out = self.net(images)
 
@@ -138,21 +136,25 @@ class Trainer:
                     print(
                         f"Epoch [{epoch+1}/{self._iterations}] ",
                         f"Step [{batch+1}/{len(self._trainloader)}] ",
-                        f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
+                        f"Loss: {COLORS.CYAN}{loss.item():.4f}{COLORS.ENDC}")
 
             self.test(epoch, report=report, wm=writemode, save=save)
 
-        print(f"""{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}%
-            at epoch {Colors.ENDC}{self.best_epoch+1}\n""")
+        print(f"""{COLORS.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}%
+            at epoch {COLORS.ENDC}{self.best_epoch+1}\n""")
         if report:
             self.show_best_accuracy()
 
+        if show_progress:
+            pass
+
     def show_best_accuracy(self) -> None:
+        """Prints the best accuracy and epoch to the console"""
         best_accuracy = f'Best accuracy: {100 * self.best_accuracy:.2f}%'
         print(best_accuracy + f" at epoch {self.best_epoch+1}\n")
         with open("report/report.txt", "a") as f:  # TODO Generalise this
-            f.write(f"{Colors.CYAN}" + best_accuracy)
-            f.write("at epoch {self.best_epoch+1}{Colors.ENDC}\n")
+            f.write(f"{COLORS.CYAN}" + best_accuracy)
+            f.write("at epoch {self.best_epoch+1}{COLORS.ENDC}\n")
             f.write("----------------------------------------\n")
 
     def load_params(self, path) -> None:
@@ -170,7 +172,7 @@ class Trainer:
             activation = param_list[1].split('_')[3]
             attribute = param_list[2]
             # Dictionary containing list with each layer information
-            if layer_idx not in layer_dict: 
+            if layer_idx not in layer_dict:
                 layer_dict[layer_idx] = {"type":layer_type
                                         , "activation": activation,
                                         "attributes": {}}
@@ -182,11 +184,12 @@ class Trainer:
         layer_dict = dict(sorted(layer_dict.items()))
         self.net = NeuralNetwork(layer_dict, create_net=False)
 
-        #"Layer dict contains keys for each layer." 
+        #"Layer dict contains keys for each layer."
         #"Key contains dictionary with key for type, activatioon and attributes
         # which contains key for attribute and value"
 
     def load_test(self, epoch=1) -> None:
+        """Testing the network on the test set"""
         total = 0
         correct = 0
         for i, (images, labels) in enumerate(self._testloader):
@@ -201,12 +204,14 @@ class Trainer:
         print(f"Tested on {total} images")
 
     def save(self, path) -> None:
+        """Saving the parameters of the network to a file"""
         # print(self.net.state_dict())
         # print(self.net.state_dict().keys())
         torch.save(self.net.state_dict(), path)
         print(f"Parameters saved from {path.stem} to {path}")
 
     def show_arcitechture(self, logo) -> None:
+        # pylint: disable=W1401
 
         art = """
         ______                             _      _   _ _   _______       _ _     _           
@@ -222,18 +227,18 @@ class Trainer:
         # Calculating maximum lengths for alignment
 
         settings = self._config["settings"]
-        print(f"{Colors.HEADER}Network Settings for: {Colors.ENDC}{self._config_path}")
+        print(f"{COLORS.HEADER}Network Settings for: {COLORS.ENDC}{self._config_path}")
         for key, value in settings.items():
-            print(f"{Colors.BLUE}{key.capitalize()}: {Colors.ENDC}{value}")
+            print(f"{COLORS.BLUE}{key.capitalize()}: {COLORS.ENDC}{value}")
         max_type_length = max(len(layer['type']) for layer in self._config["layer"])
-        max_input_length = max(len(str(layer['dim_in'])) 
+        max_input_length = max(len(str(layer['dim_in']))
                             for layer in self._config["layer"])
-        max_output_length = max(len(str(layer['dim_out'])) 
+        max_output_length = max(len(str(layer['dim_out']))
                                 for layer in self._config["layer"])
         max_activation_length = max(len(layer['activation']) if layer['activation'] 
                                     else 0 for layer in self._config["layer"])
 
-        print(f"{Colors.HEADER}Network Architecture:{Colors.ENDC}")
+        print(f"{COLORS.HEADER}Network Architecture:{COLORS.ENDC}")
 
         # Iterating over layers to print details
         for i, layer in enumerate(self._config["layer"], 1):
@@ -243,45 +248,46 @@ class Trainer:
             activation = (layer['activation'] if layer['activation'] else 'None')
             activation = activation.ljust(max_activation_length)
 
-            layer_str = (f"{Colors.BLUE}Layer {i}: {Colors.ENDC}{layer_type}, "
-                        f"{Colors.GREEN}Input: {Colors.ENDC}{layer_input}, "
-                        f"{Colors.YELLOW}Output: {Colors.ENDC}{layer_output}, "
-                        f"{Colors.RED}Activation: {Colors.ENDC}{activation}")
+            layer_str = (f"{COLORS.BLUE}Layer {i}: {COLORS.ENDC}{layer_type}, "
+                        f"{COLORS.GREEN}Input: {COLORS.ENDC}{layer_input}, "
+                        f"{COLORS.YELLOW}Output: {COLORS.ENDC}{layer_output}, "
+                        f"{COLORS.RED}Activation: {COLORS.ENDC}{activation}")
             if layer['type'] == "lowrank":
-                layer_str += f"{Colors.CYAN}Rank: {Colors.ENDC}{layer['rank']}"
+                layer_str += f"{COLORS.CYAN}Rank: {COLORS.ENDC}{layer['rank']}"
             print(layer_str)
-    
+
 
     def report_header(self, writemode) -> None:
+        """Prints the header for the report"""
         #Check if report folder exists and create if not.
-            Path("report").mkdir(parents=True, exist_ok=True)
+        Path("report").mkdir(parents=True, exist_ok=True)
 
-            settings = self._config["settings"]
-            header = f"Network Settings for: {self._config_path}"
-            for key, value in settings.items():
-                print(f"{key.capitalize()} : {value}")
-            max_type_length = max(len(layer['type']) for layer in self._config["layer"])
-            max_input_length = max(len(str(layer['dim_in'])) 
-                                for layer in self._config["layer"])
-            max_output_length = max(len(str(layer['dim_out'])) 
-                                    for layer in self._config["layer"])
-            max_activation_length = max(len(layer['activation']) if layer['activation'] 
-                                        else 0 for layer in self._config["layer"])
-            # Iterating over layers to print details
-            with open("report/report.txt", writemode) as f:
-                if not writemode == "w":
-                    f.write("\n\n")
-                f.write(header+"\n")
-                f.write(f"Report for {self._config_path}\n")
-                for i, layer in enumerate(self._config["layer"], 1):
-                    layer_type = layer['type'].ljust(max_type_length)
-                    layer_input = str(layer['dim_in']).rjust(max_input_length)
-                    layer_output = str(layer['dim_out']).rjust(max_output_length)
-                    activation = (layer['activation'] if layer['activation'] else 'None')
-                    activation = activation.ljust(max_activation_length)
-                    layer_str = (f" Input: {layer_input} -  "
-                                f"Output: {layer_output}\n"
-                                f" Activation: {activation}"
-                                f"Layer {i}: {layer_type}\n")
-                    f.write(layer_str)
-                f.write("----------------------------------------\n")
+        settings = self._config["settings"]
+        header = f"Network Settings for: {self._config_path}"
+        for key, value in settings.items():
+            print(f"{key.capitalize()} : {value}")
+        max_type_length = max(len(layer['type']) for layer in self._config["layer"])
+        max_input_length = max(len(str(layer['dim_in']))
+                for layer in self._config["layer"])
+        max_output_length = max(len(str(layer['dim_out']))
+                for layer in self._config["layer"])
+        max_activation_length = max(len(layer['activation']) if layer['activation']
+                else 0 for layer in self._config["layer"])
+        # Iterating over layers to print details
+        with open("report/report.txt", writemode) as f:
+            if not writemode == "w":
+                f.write("\n\n")
+            f.write(header+"\n")
+            f.write(f"Report for {self._config_path}\n")
+            for i, layer in enumerate(self._config["layer"], 1):
+                layer_type = layer['type'].ljust(max_type_length)
+                layer_input = str(layer['dim_in']).rjust(max_input_length)
+                layer_output = str(layer['dim_out']).rjust(max_output_length)
+                activation = (layer['activation'] if layer['activation'] else 'None')
+                activation = activation.ljust(max_activation_length)
+                layer_str = (f" Input: {layer_input} -  "
+                            f"Output: {layer_output}\n"
+                            f" Activation: {activation}"
+                            f"Layer {i}: {layer_type}\n")
+                f.write(layer_str)
+            f.write("----------------------------------------\n")
