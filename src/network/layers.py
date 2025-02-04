@@ -1,8 +1,10 @@
+"""Module for layers of the neural network."""
 import torch
 import torch.nn as nn
 
 
 class ActivationFactory:
+    """Factory for activation functions."""
     def __init__(self) -> None:
         try:
             self.activations = {"relu": nn.ReLU(), "linear": nn.Identity()}
@@ -14,6 +16,7 @@ class ActivationFactory:
 
 
 class LayerFactory:
+    """Factory for layers of the neural network."""
     def __init__(self) -> None:
         self.classes = {"dense": Denselayer,
                         "vanillalowrank": VanillaLowRank,
@@ -24,6 +27,7 @@ class LayerFactory:
 
 
 class Denselayer(nn.Module):
+    """Dense layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
         super(Denselayer, self).__init__()
         activation = ActivationFactory()
@@ -66,6 +70,7 @@ class Denselayer(nn.Module):
 
 
 class VanillaLowRank(nn.Module):
+    """Vanilla low rank layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
         super(VanillaLowRank, self).__init__()
         activation = ActivationFactory()
@@ -115,6 +120,7 @@ class VanillaLowRank(nn.Module):
 
 
 class LowRank(nn.Module):
+    """Low rank layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
         super(LowRank, self).__init__()
         activation = ActivationFactory()

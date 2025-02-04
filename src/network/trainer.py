@@ -1,3 +1,4 @@
+"""Module for training the network."""
 import time
 import torch
 import toml
@@ -10,6 +11,7 @@ from ..utils.loader import Loader
 from ..utils.conf_handler import ConfigHandler
 
 _REPORT_PATH = "report/report.txt"
+
 
 def time_it(func):
     """
@@ -32,13 +34,13 @@ class Colors:
     Container for ANSI escape codes for terminal text coloring.
     ENDC resets to default color.
     """
-    HEADER = '\033[95m' #Bright magenta
+    HEADER = '\033[95m'  # Bright magenta
     BLUE = '\033[94m'
     CYAN = '\033[96m'
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
-    ENDC = '\033[0m'  
+    ENDC = '\033[0m'
 
 
 class Trainer:
@@ -58,7 +60,7 @@ class Trainer:
             self._iterations = self._config["settings"]["iterations"]
             self._criterion = nn.CrossEntropyLoss()
             # TODO Create a criterion factory
-        
+
         if not create_net:
             self.parameter_path = Path(parameter_path)
         loader = Loader()
@@ -90,7 +92,8 @@ class Trainer:
             with open(_REPORT_PATH, wm) as f:
                 f.write(epoch_text + validation_text)
                 if epoch+1 == self._iterations:
-                    f.write(f"Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {self.best_epoch+1}\n")
+                    f.write(f"""Best accuracy: {100 * self.best_accuracy:.2f}%
+                            at epoch {self.best_epoch+1}\n""")
                     f.write("----------------------------------------\n")
 
     @time_it
@@ -99,7 +102,7 @@ class Trainer:
         if report:
             self.report_header(writemode)
             writemode = "a"
-            
+
         logging.debug("Start_training")
         for epoch in range(self._iterations):
             self.net.train()
@@ -133,20 +136,21 @@ class Trainer:
 
                 if (batch + 1) % 100 == 0:
                     print(
-                        f"Epoch [{epoch+1}/{self._iterations}] "
-                        f"Step [{batch+1}/{len(self._trainloader)}] "
+                        f"Epoch [{epoch+1}/{self._iterations}] ",
+                        f"Step [{batch+1}/{len(self._trainloader)}] ",
                         f"Loss: {Colors.CYAN}{loss.item():.4f}{Colors.ENDC}")
 
             self.test(epoch, report=report, wm=writemode, save=save)
 
-        print(f"{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}% at epoch {Colors.ENDC}{self.best_epoch+1}\n")
+        print(f"""{Colors.CYAN}Best accuracy: {100 * self.best_accuracy:.2f}%
+            at epoch {Colors.ENDC}{self.best_epoch+1}\n""")
         if report:
             self.show_best_accuracy()
 
     def show_best_accuracy(self) -> None:
         best_accuracy = f'Best accuracy: {100 * self.best_accuracy:.2f}%'
         print(best_accuracy + f" at epoch {self.best_epoch+1}\n")
-        with open("report/report.txt", "a") as f: #TODO Generalise this
+        with open("report/report.txt", "a") as f:  # TODO Generalise this
             f.write(f"{Colors.CYAN}" + best_accuracy)
             f.write("at epoch {self.best_epoch+1}{Colors.ENDC}\n")
             f.write("----------------------------------------\n")
@@ -158,7 +162,7 @@ class Trainer:
         # Parsing load_dict into the network
         network_dict = torch.load(path)
         layer_dict = {}
-        for param in network_dict: #TODO Rewrite to function.
+        for param in network_dict:  # TODO Rewrite to function.
 
             param_list = param.split('.')
             layer_idx = str(param_list[1].split('_')[1])
@@ -166,8 +170,10 @@ class Trainer:
             activation = param_list[1].split('_')[3]
             attribute = param_list[2]
             # Dictionary containing list with each layer information
-            if layer_idx not in layer_dict:
-                layer_dict[layer_idx] = {"type":layer_type, "activation": activation, "attributes": {}}
+            if layer_idx not in layer_dict: 
+                layer_dict[layer_idx] = {"type":layer_type
+                                        , "activation": activation,
+                                        "attributes": {}}
                 layer_dict[layer_idx]["attributes"][attribute] = network_dict[param]
 
             else:
@@ -176,8 +182,9 @@ class Trainer:
         layer_dict = dict(sorted(layer_dict.items()))
         self.net = NeuralNetwork(layer_dict, create_net=False)
 
-        "Layer dict contains keys for each layer." 
-        "Key contains dictionary with key for type, activatioon and attributes which contains key for attribute and value"
+        #"Layer dict contains keys for each layer." 
+        #"Key contains dictionary with key for type, activatioon and attributes
+        # which contains key for attribute and value"
 
     def load_test(self, epoch=1) -> None:
         total = 0

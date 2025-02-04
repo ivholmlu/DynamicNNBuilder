@@ -1,3 +1,4 @@
+"""Parser for the neural network."""
 from argparse import ArgumentParser
 
 

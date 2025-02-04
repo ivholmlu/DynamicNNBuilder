@@ -1,3 +1,4 @@
+"""Tests for the network module"""
 import toml
 import torch
 import torch.nn as nn
@@ -18,7 +19,7 @@ def test_creations_b(conf):
     "Test if the bias vector dimensions is created correctly"
     obj = NeuralNetwork(conf)
     for i, _ in enumerate(obj._layers):
-        assert obj._layers[i]._b.size() == (conf["layer"][i]["dim_out"],)
+        assert obj._layers[i].b.size() == (conf["layer"][i]["dim_out"],)
 
 
 @pytest.mark.parametrize(
@@ -30,15 +31,15 @@ def test_creations_dense_W(conf):
         layer_dim_in = conf["layer"][i]["dim_in"]
         layer_dim_out = conf["layer"][i]["dim_out"]
         expected_size = (layer_dim_in, layer_dim_out)
-        assert obj._layers[i]._W.size() == expected_size
+        assert obj._layers[i].W.size() == expected_size
 
 
 def test_forward():
     """Testing 3x3 dense layer with identity activation"""
     network = NeuralNetwork(single_dense_layer)
-    network._layers[0]._b = nn.Parameter(
+    network._layers[0].b = nn.Parameter(
         torch.tensor([1, 1, 1], dtype=torch.float32))
-    network._layers[0]._W = nn.Parameter(torch.tensor(
+    network._layers[0].W = nn.Parameter(torch.tensor(
         [[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=torch.float32))
     x = torch.tensor([1, 0, -1], dtype=torch.float32).unsqueeze(0)
     Z = network.forward(x)
@@ -51,9 +52,9 @@ single_dense_layer_relu = toml.load("tests/conf_test/test_network_relu.toml")
 def test_forward_with_relu():
     "Testing 3x3 dense layer with ReLU"
     network = NeuralNetwork(single_dense_layer_relu)
-    network._layers[0]._W = nn.Parameter(torch.tensor(
+    network._layers[0].W = nn.Parameter(torch.tensor(
         [[1, -1, 0], [0, 1, -1], [-1, 0, 1]], dtype=torch.float32))
-    network._layers[0]._b = nn.Parameter(
+    network._layers[0].b = nn.Parameter(
         torch.tensor([1, 0, -1], dtype=torch.float32))
     x = torch.tensor([1, 2, 3], dtype=torch.float32).unsqueeze(0)
     Z = network(x)

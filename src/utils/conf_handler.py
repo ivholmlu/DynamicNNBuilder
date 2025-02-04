@@ -1,3 +1,4 @@
+"""Module for handling errors."""
 class ConfigError(Exception):
     def __init__(self, missing_key, expected_format=None, additional_info=None):
         self.missing_key = missing_key

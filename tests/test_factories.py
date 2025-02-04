@@ -1,3 +1,4 @@
+"""Tests for the factories module."""
 import src.network.layers as layers
 import toml
 import torch.nn as nn
