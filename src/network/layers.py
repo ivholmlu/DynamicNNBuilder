@@ -118,6 +118,22 @@ class VanillaLowRank(nn.Module):
             self._V.grad.zero_()
             self._b.grad.zero_()
 
+    @property
+    def U(self):
+        return self._U
+    
+    @property
+    def S(self):
+        return self._S
+    
+    @property
+    def V(self):
+        return self._V
+
+    @property
+    def b(self):
+        return self._b
+
 
 class LowRank(nn.Module):
     """Low rank layer of the neural network."""
@@ -191,3 +207,19 @@ class LowRank(nn.Module):
 
         else:
             self._S.data = self._S - lr * self._S.grad
+    
+    @property
+    def U(self):
+        return self._U
+    
+    @property
+    def S(self):
+        return self._S
+    
+    @property
+    def V(self):
+        return self._V
+    
+    @property
+    def b(self):
+        return self._b
