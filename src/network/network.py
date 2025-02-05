@@ -42,4 +42,8 @@ class NeuralNetwork(nn.Module):
     @property
     def layers(self):
         return self._layers
+
+    @property
+    def contains_lowrank(self):
+        return self._contains_lowrank
     

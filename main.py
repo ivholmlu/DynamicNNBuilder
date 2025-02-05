@@ -4,7 +4,7 @@ import logging
 import glob
 
 from src.network.trainer import Trainer
-from src.utils.nn_parser import NN_parser_factory
+from src.utils.nn_parser import NnParserFactory
 
 
 CONFIG_PATH = "configs/config.toml" # TODO Move to argument or config file
@@ -21,7 +21,7 @@ def main() -> None:
 
     parameter_dir = Path(PARAMTER_DIR)  # Used for saving parameters
 
-    args = NN_parser_factory(CONFIG_PATH)()
+    args = NnParserFactory(CONFIG_PATH)()
 
     # If predefined weight should be used
     if args.load:
