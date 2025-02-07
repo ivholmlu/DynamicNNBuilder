@@ -1,6 +1,8 @@
-import src.network.layers as layers
+"""Tests for the factories module."""
 import toml
-import torch.nn as nn
+from torch import nn
+
+from src.network import layers
 
 config = toml.load("tests/conf_test/test_conf.toml")
 
@@ -29,6 +31,7 @@ activation = 'linear'
 
 
 def test_creation_layerfactory():
+    """Test if the layerfactory is created correctly."""
     layerfactory = layers.LayerFactory()
     assert layerfactory.classes == {"dense": layers.Denselayer,
                                     "vanillalowrank": layers.VanillaLowRank,
@@ -36,12 +39,14 @@ def test_creation_layerfactory():
 
 
 def test_return_layerfactory():
+    """Test if the layerfactory returns the correct layer."""
     layerfactory = layers.LayerFactory()
     layer = layerfactory(config["layer"][0])
     assert isinstance(layer, layers.Denselayer)
 
 
 def test_return_activationfactory():
+    """Test if the activationfactory returns the correct activation."""
     activationfactory = layers.ActivationFactory()
     activation = activationfactory(config["layer"][0]["activation"])
     assert isinstance(activation, nn.ReLU)

@@ -24,13 +24,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install flake8
+          pip install pylint
           pip install pytest
           pip install tox
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run flake8 
-        run: flake8 .
+      - name: Run pylint
+        run: pylint --fail-under=9.5 .
 
       - name: Run tests
         run: pytest tests
