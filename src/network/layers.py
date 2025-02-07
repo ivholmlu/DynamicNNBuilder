@@ -1,4 +1,6 @@
 """Module for layers of the neural network."""
+from abc import ABC, abstractmethod
+
 import torch
 import torch.nn as nn
 
@@ -25,11 +27,39 @@ class LayerFactory:
     def __call__(self, config, lr=0, load=False) -> nn.Module:
         return self.classes[config["type"]](config, lr, load)
 
+class BaseLayer(nn.Module, ABC):
+
+    def __init__(self, config, lr, load=False) -> None:
+        super(BaseLayer, self).__init__()
+        activation = ActivationFactory()
+        if not load:
+            self.activation = activation(config["activation"])
+            self.lr = lr
+            self._b = nn.Parameter(torch.randn(
+                config["dim_out"]),
+                requires_grad=True)
+        else:
+            self._b = config["attributes"]["_b"]
+            self.activation = activation(config["activation"])
+
+    @abstractmethod
+    def forward(self, X):
+        pass
+
+    @abstractmethod
+    def step(self, s):
+        pass
+
+    @property
+    def b(self):
+        return self._b
+
+#Needs b implemented, and 
 
 class Denselayer(nn.Module):
     """Dense layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
-        super(Denselayer, self).__init__()
+        super().__init__(config, lr, load)
         activation = ActivationFactory()
 
         if not load:
@@ -37,17 +67,10 @@ class Denselayer(nn.Module):
                 config["dim_in"],
                 config["dim_out"]),
                 requires_grad=True)
-            self._b = nn.Parameter(torch.randn(
-                config["dim_out"]),
-                requires_grad=True)
-
-            self.activation = activation(config["activation"])
-            self.lr = lr
 
         else:
             self._b = config["attributes"]['_b']
             self._W = config["attributes"]['_W']
-            self.activation = activation(config["activation"])
 
     def forward(self, X):
         return self.activation(torch.matmul(X, self._W) + self._b)
