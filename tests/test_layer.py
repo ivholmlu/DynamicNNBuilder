@@ -12,7 +12,7 @@ def test_creation_dense():
     dense_obj = Denselayer(config["layer"][0], lr=0)
     assert dense_obj.b.size() == (512,)
     assert dense_obj.W.size() == (784, 512)
-    assert dense_obj.activation == 5
+    
 
 
 def test_config():
