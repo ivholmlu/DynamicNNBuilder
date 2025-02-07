@@ -10,10 +10,6 @@ Furthermore there is a guide to show the usecase of the project.
 
 # Project Setup Guide
 
-## Setting Up a Python Virtual Environment
-
-This guide will walk you through the process of setting up a virtual environment for this project using Python >= 3.9.12. During developement Python 3.9.12 was used.
-
 ### Prerequisites
 
 - Ensure you have >=Python 3.9.12 installed on your system.
@@ -36,25 +32,37 @@ This guide will walk you through the process of setting up a virtual environment
 4. **Install the requirementes**
     ```bash
     pip install -r requirements.txt
+    ```
 
 
-### How to use the DynamicNNBuilder
-
-To run the default config file in main folder use:
+To run the default config file in configs folder use:
 
 `python main.py`
 
-To define a specific toml or folder with toml files use:
+<details>
+  <summary>Arguments</summary>
 
-`python main.py -f path_to_file_or_folder.toml`
+The `DynamicNNBuilder` uses an `ArgumentParser` to manage command-line options. Here's a breakdown of all available options:
 
-To save at a specific location, use:
+| Option        | Short | Type   | Default        | Description                                                                                                                                                                                                                                                                                               |
+|---------------|-------|--------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--file`      | `-f`  | string | `_config_path` | Path to the main configuration file (TOML).  This can be a single `.toml` file or a directory containing multiple `.toml` files. If a directory is provided, the builder will process all `.toml` files within it.                                                                                               |
+| `--save`      | `-s`  | string | `"parameters"`  | Filename (without extension) to save the trained model's parameters. The saved file will be placed in a directory (likely a "parameters" folder, but this might depend on other configurations).                                                                                                      |
+| `--load`      | `-l`  | string | `None`         | Filename (without extension) to load pre-trained model parameters.  The code expects the file to be in the same location where parameters are saved. If this option is provided, the model will load these parameters instead of training from scratch.                                                  |
+| `--kaggle`    | `-k`  | bool   | `False`        | If set to `True`, the network will be used to generate a CSV prediction file suitable for Kaggle competitions. This assumes the code is set up to handle the Kaggle data format and prediction generation.                                                                                             |
+| `--conf_dir`  | `-cd` | string | `None`         | Path to a directory containing configuration files (TOML). This is an alternative way to provide configurations, especially useful when comparing multiple network configurations. If this is provided it will overwrite the `-f` flag.                                                                   |
+| `--report`    | `-r`  | bool   | `False`        | If set to `True`, a report summarizing the training results and other relevant metrics will be generated.                                                                                                                                                                                            |
+| `--report_dir`| `-rd` | string | `"report"`     | Path to the directory where the generated report will be saved.                                                                                                                                                                                                                                         |
+</details>
 
-`python main.py -l path_to_save_location`
+<details>
+<summary>Example Usage</summary>
 
-You can specify where the report should be saved with:
-
-`python main.py -rd report_save_path`
+* **Running with a specific TOML file:**
+  ```bash
+  python main.py -f path/to/my_config.toml
+  ```
+</summary>
 
 **!!! UNDER DEVELOPMENT !!!**
 
