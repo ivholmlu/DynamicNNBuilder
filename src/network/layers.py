@@ -2,8 +2,12 @@
 from abc import ABC, abstractmethod
 
 import torch
-import torch.nn as nn
+from torch import nn
 
+# pylint: disable=C0116
+# pylint: disable=C0103
+# pylint: disable=R0903
+# pylint: disable=E1102
 
 class ActivationFactory:
     """Factory for activation functions."""
@@ -13,8 +17,8 @@ class ActivationFactory:
         except KeyError as e:
             print(f"Activation {e} is not a defined activation")
 
-    def __call__(self, type) -> nn.Module:
-        return self.activations[type]
+    def __call__(self, activation_type) -> nn.Module:
+        return self.activations[activation_type]
 
 
 class LayerFactory:
@@ -28,19 +32,32 @@ class LayerFactory:
         return self.classes[config["type"]](config, lr, load)
 
 class BaseLayer(nn.Module, ABC):
-
+    """Base layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
-        super(BaseLayer, self).__init__()
+        super().__init__()
         activation = ActivationFactory()
-        if not load:
+        if "activation" not in config:
+            raise KeyError(
+                "Missing 'activation' in the configuration file. "
+                "Please ensure it is defined in your TOML file under the correct section."
+            )
+
+        try:
             self.activation = activation(config["activation"])
+        except KeyError as exc:
+            keys = ", ".join(list(activation.activations.keys()))
+            raise ValueError(
+                f"""Activation function {config['activation']} not found. "
+                    Please use one of the following: {keys} """
+            ) from exc
+
+        if not load:
             self.lr = lr
             self._b = nn.Parameter(torch.randn(
                 config["dim_out"]),
                 requires_grad=True)
         else:
             self._b = config["attributes"]["_b"]
-            self.activation = activation(config["activation"])
 
     @abstractmethod
     def forward(self, X):
@@ -54,13 +71,11 @@ class BaseLayer(nn.Module, ABC):
     def b(self):
         return self._b
 
-#Needs b implemented, and 
 
-class Denselayer(nn.Module):
+class Denselayer(BaseLayer):
     """Dense layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
         super().__init__(config, lr, load)
-        activation = ActivationFactory()
 
         if not load:
             self._W = nn.Parameter(torch.randn(
@@ -82,7 +97,7 @@ class Denselayer(nn.Module):
             self._b.data = self._b - self.lr * self._b.grad
             self._W.grad.zero_()
             self._b.grad.zero_()
-    
+
     @property
     def b(self):
         return self._b
@@ -92,11 +107,11 @@ class Denselayer(nn.Module):
         return self._W
 
 
-class VanillaLowRank(nn.Module):
+class VanillaLowRank(BaseLayer):
     """Vanilla low rank layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
-        super(VanillaLowRank, self).__init__()
-        activation = ActivationFactory()
+        super().__init__(config, lr, load)
+
         if not load:
             self._U = nn.Parameter(torch.randn(
                 config["dim_in"], config["rank"]), requires_grad=True)
@@ -107,12 +122,12 @@ class VanillaLowRank(nn.Module):
             self._b = nn.Parameter(torch.randn(
                 config["dim_out"]), requires_grad=True)
 
-            U1, _ = torch.linalg.qr(self._U, 'reduced')
-            V1, _ = torch.linalg.qr(self._V, 'reduced')
+            U1, _ = torch.linalg.qr(self._U, mode='reduced')
+            V1, _ = torch.linalg.qr(self._V, mode='reduced')
             self._U.data = U1
             self._V.data = V1
 
-            self.activation = activation(config["activation"])
+
             self.lr = lr
 
         else:
@@ -121,8 +136,6 @@ class VanillaLowRank(nn.Module):
             self._V = config["attributes"]["_V"]
             self._b = config["attributes"]["_b"]
             self._r = self._S.size()[0]
-
-            self.activation = activation(config["activation"])
 
     def forward(self, X) -> torch.Tensor:
         W = torch.matmul(torch.matmul(self._U, self._S), self._V.T)
@@ -144,38 +157,30 @@ class VanillaLowRank(nn.Module):
     @property
     def U(self):
         return self._U
-    
+
     @property
     def S(self):
         return self._S
-    
+
     @property
     def V(self):
         return self._V
 
-    @property
-    def b(self):
-        return self._b
 
-
-class LowRank(nn.Module):
+class LowRank(BaseLayer):
     """Low rank layer of the neural network."""
     def __init__(self, config, lr, load=False) -> None:
-        super(LowRank, self).__init__()
-        activation = ActivationFactory()
+        super().__init__(config, lr, load)
         if not load:
             self._r = config["rank"]
-            self.lr = lr
-            activation = ActivationFactory()
-            self.activation = activation(config["activation"])
 
             self._U = nn.Parameter(torch.randn(config["dim_in"], self._r))
             self._S = nn.Parameter(torch.randn(self._r, self._r))
             self._V = nn.Parameter(torch.randn(config["dim_out"], self._r))
             self._b = nn.Parameter(torch.randn(config["dim_out"]))
 
-            U1, _ = torch.linalg.qr(self._U, 'reduced')
-            V1, _ = torch.linalg.qr(self._V, 'reduced')
+            U1, _ = torch.linalg.qr(self._U, mode='reduced')
+            V1, _ = torch.linalg.qr(self._V, mode='reduced')
             self._U.data = U1
             self._V.data = V1
 
@@ -190,7 +195,6 @@ class LowRank(nn.Module):
             self._V = config["attributes"]["_V"]
             self._b = config["attributes"]["_b"]
             self._r = self._S.size()[0]
-            self.activation = activation(config["activation"])
 
     def forward(self, X) -> torch.Tensor:
         r = self._r
@@ -209,11 +213,11 @@ class LowRank(nn.Module):
             dK = torch.matmul(self._U.grad, self._S)
             K = K - lr * dK
 
-            self._U1.data, _ = torch.linalg.qr(K, "reduced")
+            self._U1.data, _ = torch.linalg.qr(K, mode="reduced")
             L = torch.matmul(self._V, self._S.T)
             dL = torch.matmul(self._V.grad[:, :r], self._S.T)
             L = L - lr * dL
-            self._V1.data, _ = torch.linalg.qr(L, "reduced")
+            self._V1.data, _ = torch.linalg.qr(L, mode="reduced")
 
             M = torch.matmul(self._U1.T, self._U)
             N = torch.matmul(self._V.T, self._V1)
@@ -230,19 +234,15 @@ class LowRank(nn.Module):
 
         else:
             self._S.data = self._S - lr * self._S.grad
-    
+
     @property
     def U(self):
         return self._U
-    
+
     @property
     def S(self):
         return self._S
-    
+
     @property
     def V(self):
         return self._V
-    
-    @property
-    def b(self):
-        return self._b
